@@ -4,7 +4,7 @@
 
 1. 点击网盘链接或网盘链接文本（会自动转成链接），自动搜索密码，跳转后自动填写密码并提交
 
-   支持网盘列表：[百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[小麦魔方](https://mo.own-cloud.cn)、[清玖云](https://cloud.qingstore.cn)、[马恩资料库云盘](https://pan.mebk.org)、[90网盘](https://www.90pan.com)、部分城通网盘
+   支持网盘列表：[百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[小麦魔方](https://mo.own-cloud.cn)、[清玖云](https://cloud.qingstore.cn)、[马恩资料库云盘](https://pan.mebk.org)、[90网盘](https://www.90pan.com)、部分城通网盘
 
 2. 跳转页面自动跳转（微博短链、书签地球、阳光盒子、开发者知识库）
 
@@ -19,15 +19,10 @@
 ## 其他说明
 
 * 网盘自动填写密码功能**不支持云查询密码**，也不记录密码，只会在个别网盘链接不支持添加hash时将密码临时存储在脚本的数据页中
-
 * 分开格式化的链接文本不能转换为完整链接
 * 添加例外域名菜单是针对净化跳转链接功能设置的，添加后含该域名的链接不会被净化
 * 在新标签打开链接功能有相关菜单项可打开/关闭（默认关闭），可针对特定站点关闭（该站链接保持默认打开方式），翻页链接、相对链接、锚点链接保持原有打开方式
 * 脚本默认不支持对<iframe>页面进行注入，如果需要注入<iframe>页面，可以将脚本头部声明中的 `@noframes` 一行删除掉后保存
-
-## 功能演示
-
-![](asset/网盘自动填写密码.gif)
 
 ## 参考脚本
 
