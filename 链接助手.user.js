@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @match           *://*/*
-// @version         1.2.5
+// @version         1.2.6
 // @author          一个北七
 // @run-at          document-body
 // @description     常用网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、Mozilla开发者自动切换中文(可控), 维基百科、谷歌开发者链接转为镜像链接; 新标签打开链接(可控)
@@ -57,7 +57,6 @@
     } else if ( /https:\/\/www\.qiuziyuan\.net\/(?:pcrj\/|Android\/\d+\.html)/.test(location.href) ) { // 求资源网
         var filetit = document.querySelector("div.filetit");
         for (var a of filetit.children) {
-            //   console.log(a);
             if (a.href) {
                 var result = url_regexp.exec(a.innerHTML);
                 if (result) a.href = result[1].startsWith("http") ? result[1] : "https://" + result[1];
@@ -162,7 +161,6 @@
             },
             
             "vdisk.weibo.com": { // 微盘
-                // include: ["vdisk.weibo.com/lc"],
                 inputSelector: "#keypass",
                 buttonSelector: "div.search_btn_wrap>a", 
                 regStr: "[a-z\\d]{4}",
@@ -173,7 +171,6 @@
             "pan.xunlei.com": { // 迅雷云盘
                 inputSelector: "input.td-input__inner",
                 buttonSelector: "button.td-button", 
-                // regExp: /^[a-z\d]{4}$/i,
                 regStr: "[a-z\\d]{4}",
                 timeout: 1500,
                 clickTimeout: 10,
@@ -415,7 +412,7 @@
             "mozilla": function() {
                 let isZh = location.pathname.includes("zh-CN");
                 let jumpToZh = GM_getValue("jumpToZh", true), lastHref = null;
-                let options = document.querySelectorAll("#select_language>option");
+                let options = document.querySelectorAll("#select_language>option,#language-selector>option");
                 if (!isZh) {
                     if (jumpToZh) {
                         for (let i = options.length - 1; i > 0; i--) {
@@ -522,7 +519,6 @@
             
             // 文本转链接
             function textToLink(e) {
-                // console.log(e);
                 if ( !["body", "code", "pre"].some( tag => tag === e.localName) && !["www.google"].some( h => location.host.includes(h) ) ) {
                     let span = null, count = 0;
                     for (let i = e.childNodes.length-1, limit = 10; i >= 0 && limit > 0; i--) {
