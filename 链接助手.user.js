@@ -2,10 +2,12 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7/LinkHelper
 // @match           *://*/*
-// @version         1.3.4
+// @version         1.5.0
 // @author          一个北七
 // @run-at          document-body
 // @description     常用网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、Mozilla开发者自动切换中文(可控), 维基百科、谷歌开发者链接转为镜像链接; 新标签打开链接(可控)
+// @icon            https://gitee.com/oneNorth7/pics/raw/master/picgo/link-helper.png
+// @noframes
 // @license         GPL-3.0 License
 // @grant           GM_registerMenuCommand
 // @grant           GM_unregisterMenuCommand
@@ -14,682 +16,915 @@
 // @grant           GM_setValue
 // @grant           GM_getValue
 // @grant           GM_deleteValue
-// @noframes
-// @icon            https://gitee.com/oneNorth7/pics/raw/master/picgo/link-helper.png
-// @created         2021/1/26 下午18:03:47
+// @require         https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
+// @created         2021年3月19日 09:48:14
 // ==/UserScript==
 
-!function() {
-    // 显示消息通知
-    function showNotice(msg) {
-        GM_notification({
-            text: msg,
-            title: GM_info.script.name,
-            highlight: false,
-            silent: false,
-            timeout: 60
-        });
-    }
-    
-    let url_regexp = /((?:https?:\/\/|www\.)[\x21-\x7e]+[\w\/=]|\w(?:[\w._-])+@\w[\w\._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu)|(?:\w[\w._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\/[\x21-\x7e]*[\w\/])?)/i;
-    
-    // 网盘密码预处理
-    if ( /http:\/\/www\.38hack\.com\/\d+\.html/.test(location.href) ) {  // 爱之语
-        let lines = document.querySelectorAll('div.down-line');
-        if (lines.length) lines[lines.length-1].appendChild(lines[0].previousElementSibling.previousElementSibling);
-    }
-    else if (/https:\/\/www\.mikuclub\.xyz\/\d+/.test(location.href)) { // 初音社
-        let password = document.querySelector('.password1');
-        if (password) document.querySelector('a.download').hash = password.value;
-    }
-    else if ( /https:\/\/www\.acggw\.com\/\d+\.html/.test(location.href) ) { // ACG港湾
-        let ps = document.querySelectorAll('.single-content>p'), l = null, m = null;
-        for (let p of ps) {
-          if (p.innerText.startsWith('链接：')) l = p;
-          if (l && p.innerText.startsWith('密码：')) l.innerText += '#' + p.innerText.replace('密码：', '');
-          if (m && p.innerText.startsWith('国外M盘：')) m.innerText += '#' + p.innerText.replace('国外M盘：', '');
-          if (p.innerText.startsWith('国外M盘：http')) m = p;
-        }
-    }
-    else if ( /http:\/\/www\.olecn\.com\/download\.php\?id=\d+/.test(location.href) ) { // 百度网盘资源
-        let lis = document.querySelectorAll('div.plus_l li');
-        let a = document.querySelector('div.panel-body a');
-        a.hash = lis[3].innerText.replace('网盘提取码 ：', '');
-    } else if ( /https:\/\/www\.qiuziyuan\.net\/(?:pcrj\/|Android\/\d+\.html)/.test(location.href) ) { // 求资源网
-        var filetit = document.querySelector("div.filetit");
-        for (var a of filetit.children) {
-            if (a.href) {
-                var result = url_regexp.exec(a.innerHTML);
-                if (result) a.href = result[1].startsWith("http") ? result[1] : "https://" + result[1];
+$(function () {
+    "use strict";
+
+    const scriptInfo = GM_info.script,
+        locHost = location.host,
+        locHref = location.href,
+        locHash = location.hash,
+        locPath = location.pathname;
+
+    let t = {
+        showNotice(msg) {
+            GM_notification({
+                text: msg,
+                title: scriptInfo.name,
+                image: scriptInfo.icon,
+                highlight: false,
+                silent: false,
+                timeout: 1500,
+            });
+        },
+
+        clog(msg) {
+            console.group("链接助手");
+            console.log(msg);
+            console.groupEnd();
+        },
+
+        get(name, def) {
+            return GM_getValue(name, def);
+        },
+
+        set(name, value) {
+            GM_setValue(name, value);
+        },
+
+        delete(name) {
+            GM_deleteValue(name);
+        },
+
+        registerMenu(title, func) {
+            return GM_registerMenuCommand(title, func);
+        },
+
+        unregisterMenu(menuID) {
+            GM_unregisterMenuCommand(menuID);
+        },
+
+        http(link, s = false) {
+            return link.startsWith("http")
+                ? link
+                : (s ? "https://" : "http://") + link;
+        },
+
+        hashcode() {
+            return locHash.slice(1);
+        },
+
+        clean(src, str) {
+            for (let s of str) {
+                src = src.replace(s, "");
             }
-            if ( a.innerHTML.startsWith("90网盘：") || a.innerHTML.includes("90pan") ) {
-                var dom = filetit.nextElementSibling.nextElementSibling;
-                var result = /(?:90网盘：|\/\s*)(\d+)/.exec(dom.innerHTML);
-                if (result) a.href += "#" + result[1];
-            }
-        }
-    }
+            return src;
+        },
+
+        loop(func, times) {
+            let tid = setInterval(() => {
+                if (times <= 0) clearInterval(tid);
+                func();
+                this.clog(times);
+                times--;
+            }, 100);
+        },
+    };
+
+    let url_regexp = /(\w(?:[\w._-])+@\w[\w\._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu)|(?:https?:\/\/|www\.)[\w_\-\.~\/\=\?&#]+|(?:\w[\w._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\/[\w_\-\.~\/\=\?&#]*)?)/i;
     
-    // 网盘自动填写密码
+    let Preprocess = {
+        "www.38hack.com": function () {
+            if (/http:\/\/www\.38hack\.com\/\d+\.html/.test(locHref)) {
+                let lines = $("div.down-line");
+
+                if (lines.length)
+                    lines.last().append(lines.first().prev().prev());
+            }
+        },
+
+        "www.mikuclub.xyz": function () {
+            if (/https:\/\/www\.mikuclub\.xyz\/\d+/.test(locHref)) {
+                let password = $(".password1"),
+                    link = $("a.download");
+                if (password.length && link.length)
+                    link[0].hash = password[0].value;
+            }
+        },
+
+        "www.acggw.com": function () {
+            if (/https:\/\/www\.acggw\.com\/\d+\.html/.test(locHref)) {
+                let paragraphs = $(".single-content>p"),
+                    weiyun = null,
+                    mega = null;
+                for (let p of paragraphs) {
+                    let text = $(p).text();
+                    if (text.startsWith("链接：")) weiyun = $(p);
+                    if (weiyun && text.startsWith("密码："))
+                        weiyun.text(
+                            weiyun.text() + "#" + text.replace("密码：", "")
+                        );
+                    if (mega && text.startsWith("国外M盘："))
+                        mega.text(
+                            mega.text() + "#" + text.replace("国外M盘：", "")
+                        );
+                    if (text.startsWith("国外M盘：http")) mega = $(p);
+                }
+            }
+        },
+
+        "www.olecn.com": function () {
+            if (
+                /http:\/\/www\.olecn\.com\/download\.php\?id=\d+/.test(locHref)
+            ) {
+                let link = $("div.panel-body a"),
+                    pass = $("div.plus_l li:eq(3)");
+                if (link.length && pass.length)
+                    link[0].hash = pass
+                        .text()
+                        .trim()
+                        .replace("网盘提取码 ：", "");
+            }
+        },
+
+        "www.qiuziyuan.net": function () {
+            if (
+                /https:\/\/www\.qiuziyuan\.net\/(?:pcrj\/|Android\/\d+\.html)/.test(
+                    locHref
+                )
+            ) {
+                let filetit = $("div.filetit:first");
+                for (let child of filetit.children()) {
+                    if (child.href) {
+                        let result = url_regexp.exec(child.innerHTML);
+                        if (result) child.href = t.http(result[1]);
+                    }
+
+                    if (
+                        child.innerHTML.startsWith("90网盘：") ||
+                        child.innerHTML.includes("90pan")
+                    ) {
+                        let dom = filetit.next().next(),
+                            result = /(?:90网盘：|\/\s*)(\d+)/.exec(dom.html());
+                        if (result) child.href += "#" + result[1];
+                    }
+                }
+            }
+        },
+    };
+
+    if (Preprocess[locHost]) Preprocess[locHost]();
+
     let YunDisk = {
         sites: {
-            "pan.baidu.com": { // 百度云
+            "pan.baidu.com": {
+                // 百度云
                 inputSelector: "#accessCode",
-                buttonSelector: "#submitBtn", 
+                buttonSelector: "#submitBtn",
                 regStr: "[a-z\\d]{4}",
-                timeout: 0,
-                clickTimeout: 0
             },
-            
-            "eyun.baidu.com": { // 百度企业网盘
+
+            "eyun.baidu.com": {
+                // 百度企业网盘
                 inputSelector: "input.share-access-code",
                 buttonSelector: "a.g-button",
                 regStr: "[a-z\\d]{4}",
-                timeout: 10,
-                clickTimeout: 10
-            },
-            
-            "cloud.189.cn": { // 天翼云
-                inputSelector: "#code_txt",
-                buttonSelector: "a.btn-primary", 
-                regStr: "[a-z\\d]{4}",
-                timeout: 10,
-                clickTimeout: 500
-            },
-            
-            "lanzou.com": { // 蓝奏云
-                inputSelector: "#pwd",
-                buttonSelector: "#sub, .passwddiv-btn", 
-                regStr: "[a-z\\d]{2,8}",
-                timeout: 10,
-                clickTimeout: 10
-            }, 
-            
-            "n802.com": { // 城通网盘
-                inputSelector: "#passcode",
-                buttonSelector: "button.btn-primary", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 10,
-                clickTimeout: 500
-            },
-            
-            "306t.com": { // 城通网盘
-                inputSelector: "#passcode",
-                buttonSelector: "button.btn-primary", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 10,
-                clickTimeout: 500
-            },
-            
-            "089u.com": { // 城通网盘
-                inputSelector: "#passcode",
-                buttonSelector: "button.btn-primary", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 800,
-                clickTimeout: 500
-            },
-            
-            "ct.ghpym.com": { // 果核城通网盘
-                inputSelector: "#passcode",
-                buttonSelector: "button.btn-primary", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 500,
-                clickTimeout: 500
-            },
-            
-            "474b.com": { // 爱之语城通网盘
-                inputSelector: "#passcode",
-                buttonSelector: "button.btn-primary", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 500,
-                clickTimeout: 500
-            },
-            
-            "590m.com": { // 小众软件城通网盘
-                inputSelector: "#passcode",
-                buttonSelector: "button.btn-primary", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 500,
-                clickTimeout: 500
-            },
-            
-            "www.90pan.com": { // 90网盘
-                inputSelector: "#code",
-                buttonSelector: "button.btn-info", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 10,
-                clickTimeout: 500
-            },
-            
-            "vdisk.weibo.com": { // 微盘
-                inputSelector: "#keypass",
-                buttonSelector: "div.search_btn_wrap>a", 
-                regStr: "[a-z\\d]{4}",
-                timeout: 100,
-                clickTimeout: 10
-            },
-            
-            "pan.xunlei.com": { // 迅雷云盘
-                inputSelector: "#__nuxt input.td-input__inner",
-                buttonSelector: "#__nuxt button.td-button", 
-                regStr: "[a-z\\d]{4}",
-                timeout: 3000,
-                clickTimeout: 10,
-                store: true,
-                inputEvent: true,
-            },
-            
-            "share.weiyun.com": { // 微云
-                inputSelector: "input.input-txt",
-                buttonSelector: "button.btn-main", 
-                regStr: "[a-z\\d]{4,6}",
-                timeout: 1000,
-                clickTimeout: 10, 
-                inputEvent: true
-            },
-            
-            "115.com": { // 115网盘
-                inputSelector: "input.text",
-                buttonSelector: "a.btn-large", 
-                regStr: "[a-z\\d]{4}",
-                timeout: 500,
-                clickTimeout: 10,
-                inputEvent: true
-            },
-            
-            "quqi.com": { // 曲奇云
-                inputSelector: "div.webix_el_box>input",
-                buttonSelector: "button.webixtype_base", 
-                regStr: "[a-z\\d]{6}",
-                timeout: 600,
-                clickTimeout: 10,
-            },
-            
-            "caiyun.139.com": { // 和彩云
-                inputSelector: "input",
-                buttonSelector: "a.btn-token", 
-                regStr: "[a-z\\d]{4}",
-                timeout: 500,
-                clickTimeout: 10,
-                inputEvent: true,
-                store: true
-            },
-            
-            "mo.own-cloud.cn": { // 小麦魔方
-                inputSelector: "#pwd",
-                buttonSelector: "button.MuiButton-root", 
-                regStr: "[a-z\\d]{4,8}",
-                timeout: 500,
-                clickTimeout: 10,
-                store: true,
-                react: true
-            },
-            
-            "cloud.qingstore.cn": { // 清玖云
-                inputSelector: "#pwd",
-                buttonSelector: "button.MuiButton-root", 
-                regStr: "[a-z\\d]{4}",
-                timeout: 500,
-                clickTimeout: 10,
-                store: true,
-                react: true
-            },
-            
-            "pan.mebk.org": { // 马恩资料库云盘
-                inputSelector: "#pwd",
-                buttonSelector: "button.MuiButton-root", 
-                regStr: "[a-z\\d]{6}",
-                timeout: 500,
-                clickTimeout: 10,
-                store: true,
-                react: true
-            },
-            
-            "pan.bilnn.com": { // 比邻云盘
-                inputSelector: "#pwd",
-                buttonSelector: "button.MuiButton-root", 
-                regStr: "[a-z\\d]{6}",
-                timeout: 500,
-                clickTimeout: 10,
-                store: true,
-                react: true
-            },
-            
-            "mega.nz": {
-                regExp: /^[a-z\d\-_]{22}$/i
             },
 
+            "cloud.189.cn": {
+                // 天翼云
+                inputSelector: "#code_txt",
+                buttonSelector: "a.btn-primary",
+                regStr: "[a-z\\d]{4}",
+                clickTimeout: 500,
+            },
+
+            "lanzou.com": {
+                // 蓝奏云
+                inputSelector: "#pwd",
+                buttonSelector: "#sub, .passwddiv-btn",
+                regStr: "[a-z\\d]{2,8}",
+            },
+
+            "n802.com": {
+                // 城通网盘
+                inputSelector: "#passcode",
+                buttonSelector: "button.btn-primary",
+                regStr: "[a-z\\d]{4,6}",
+                timeout: 100, // >=90
+            },
+
+            "089u.com": {
+                // 城通网盘
+                inputSelector: "#passcode",
+                buttonSelector: "button.btn-primary",
+                regStr: "[a-z\\d]{4,6}",
+                timeout: 100,
+            },
+
+            "ct.ghpym.com": {
+                // 果核城通网盘
+                inputSelector: "#passcode",
+                buttonSelector: "button.btn-primary",
+                regStr: "[a-z\\d]{4,6}",
+                timeout: 200, // >=125
+            },
+
+            "474b.com": {
+                // 爱之语城通网盘
+                inputSelector: "#passcode",
+                buttonSelector: "button.btn-primary",
+                regStr: "[a-z\\d]{4,6}",
+                timeout: 100,
+            },
+
+            "590m.com": {
+                // 小众软件城通网盘
+                inputSelector: "#passcode",
+                buttonSelector: "button.btn-primary",
+                regStr: "[a-z\\d]{4,6}",
+                timeout: 200,
+            },
+
+            "www.90pan.com": {
+                // 90网盘
+                inputSelector: "#code",
+                buttonSelector: "button.btn-info",
+                regStr: "[a-z\\d]{4,6}",
+            },
+
+            "vdisk.weibo.com": {
+                // 微盘
+                inputSelector: "#keypass",
+                buttonSelector: "div.search_btn_wrap>a",
+                regStr: "[a-z\\d]{4}",
+            },
+
+            "pan.xunlei.com": {
+                // 迅雷云盘
+                inputSelector: "#__nuxt input.td-input__inner",
+                buttonSelector: "#__nuxt button.td-button",
+                regStr: "[a-z\\d]{4}",
+                timeout: 1500,
+                store: true,
+                inputEvent: true,
+            },
+
+            "share.weiyun.com": {
+                // 微云
+                inputSelector: "input.input-txt",
+                buttonSelector: "button.btn-main",
+                regStr: "[a-z\\d]{4,6}",
+                timeout: 500,
+                inputEvent: true,
+            },
+
+            "115.com": {
+                // 115网盘
+                inputSelector: "input.text",
+                buttonSelector: "a.btn-large",
+                regStr: "[a-z\\d]{4}",
+                timeout: 500,
+                inputEvent: true,
+            },
+
+            "quqi.com": {
+                // 曲奇云
+                inputSelector: "div.webix_el_box>input",
+                buttonSelector: "button.webixtype_base",
+                regStr: "[a-z\\d]{6}",
+                timeout: 800,
+            },
+
+            "caiyun.139.com": {
+                // 和彩云
+                inputSelector: "input",
+                buttonSelector: "a.btn-token",
+                regStr: "[a-z\\d]{4}",
+                timeout: 500,
+                inputEvent: true,
+                store: true,
+            },
+
+            "mo.own-cloud.cn": {
+                // 小麦魔方
+                inputSelector: "#pwd",
+                buttonSelector: "button.MuiButton-root",
+                regStr: "[a-z\\d]{4,8}",
+                timeout: 500,
+                store: true,
+                react: true,
+            },
+
+            "cloud.qingstore.cn": {
+                // 清玖云
+                inputSelector: "#pwd",
+                buttonSelector: "button.MuiButton-root",
+                regStr: "[a-z\\d]{4}",
+                timeout: 500,
+                store: true,
+                react: true,
+            },
+
+            "pan.mebk.org": {
+                // 马恩资料库云盘
+                inputSelector: "#pwd",
+                buttonSelector: "button.MuiButton-root",
+                regStr: "[a-z\\d]{6}",
+                timeout: 500,
+                store: true,
+                react: true,
+            },
+
+            "pan.bilnn.com": {
+                // 比邻云盘
+                inputSelector: "#pwd",
+                buttonSelector: "button.MuiButton-root",
+                regStr: "[a-z\\d]{6}",
+                timeout: 500,
+                store: true,
+                react: true,
+            },
+
+            "mega.nz": {
+                regExp: /^[a-z\d\-_]{22}$/i,
+            },
         },
-        
-        // 自动填写密码并点击跳转
-        autoFill: function(host) {
+
+        mapHost(host) {
+            return host
+                .replace(/.*lanzou[isx]?.com/, "lanzou.com")
+                .replace(/quqi\.\w+\.com/, "quqi.com");
+        },
+
+        autoFill(host) {
             let site = this.sites[host];
-            if (site.inputSelector) {
-                setTimeout(function() {
-                    let input = document.querySelector(site.inputSelector);
-                    let button = document.querySelector(site.buttonSelector);
-                    let code = null;
-                    if (input) {
-                        if (site.store) code = GM_getValue(host);
-                        else code = location.hash.slice(1);
+            if (site.timeout) setTimeout(fillOnce, site.timeout);
+            else fillOnce();
+            function fillOnce() {
+                if (site.inputSelector) {
+                    let input = $(site.inputSelector),
+                        button = $(site.buttonSelector),
+                        code = null;
+                    if (input.length) {
+                        if (site.store) code = t.get(host);
+                        else code = t.hashcode();
                         if (code) {
-                            let regExp = new RegExp("^" + site.regStr + "$", "i");
-                            if ( regExp.test(code) ) {
+                            let codeRe = RegExp("^" + site.regStr + "$", "i");
+                            if (codeRe.test(code)) {
                                 if (site.inputEvent) {
-                                    let t=setInterval(function() {
-                                        input.focus()
-                                        input.value = code;
-                                        if(input.value !== '') {
-                                            if(typeof(InputEvent)!=='undefined') {
-                                                //使用 InputEvent 方法，主流浏览器兼容
-                                                input.dispatchEvent(new InputEvent("input")); //模拟事件
-                                            } else if(KeyboardEvent) {
-                                                //使用 KeyboardEvent 方法，ES6以下的浏览器方法
-                                                input.dispatchEvent(new KeyboardEvent("input"));
+                                    let tid = setInterval(() => {
+                                        input.val(code);
+                                        if (input.val() !== "") {
+                                            if (InputEvent) {
+                                                input[0].dispatchEvent(
+                                                    new InputEvent("input")
+                                                );
+                                            } else if (KeyboardEvent) {
+                                                input[0].dispatchEvent(
+                                                    new KeyboardEvent("input")
+                                                );
                                             }
-                                            clearInterval(t);
-                                            input.blur()
-                                            button.dispatchEvent(new MouseEvent("click"));
+
+                                            clearInterval(tid);
+                                            button.click();
                                         }
                                     }, 1000);
                                 } else if (site.react) {
-                                    let event = new Event('input', { bubbles: true });
-                                    let lastValue = input.value
-                                    input.value = code;
-                                    let tracker = input._valueTracker;
+                                    let lastValue = input.val();
+                                    input.val(code);
+                                    let tracker = input[0]._valueTracker;
                                     if (tracker) tracker.setValue(lastValue);
-                                    input.dispatchEvent(event);
-                                    setTimeout( () => button.click(), site.clickTimeout );
+                                    input.trigger("input");
+                                    button.click();
+                                } else {
+                                    input.val(code);
+                                    if (site.clickTimeout)
+                                        setTimeout(() => {
+                                            button[0].click();
+                                        }, site.clickTimeout);
+                                    else button[0].click();
                                 }
-                            else {
-                                    input.value = code;
-                                    setTimeout( () => button.click(), site.clickTimeout );
-                                }
-                            } else console.log("未找到提取码!");
-                        } else console.log("无需提取码!");
-                    } else console.log(`input: ${input}`); // showNotice(`input: ${input}`);
-                }, site.timeout);
+                                success_times = +t.get("success_times") + 1;
+                                t.set("success_times", success_times);
+                            } else {
+                                t.clog("未找到合适的提取码!");
+                            }
+                        } else {
+                            t.clog("未找到提取码!");
+                        }
+                    } else {
+                        t.clog("无需填写密码!");
+                    }
+                }
             }
         },
-        
-        // 映射域名
-        mapHost: function(host) {
-            return host.replace(/.*lanzou[isx]?.com/, "lanzou.com").replace(/quqi\.\w+\.com/, 'quqi.com');
-        },
-        
-        addCode2: function(a) {
-            let site = this.sites[this.mapHost(a.host)];
-            let regExp = new RegExp("^" + site.regStr + "$", "i");
-            if ( !regExp.test( a.hash.slice(1) ) ) {
-                // let reg = new RegExp( "(?:提[取示]|访问|查阅|密\\s*|艾|Extracted-code|\\skey)[码碼]?\\s*[:： （(]?\\s*(" + site.regStr + ")|^\\s*[:： （(]?\\s*(" + site.regStr + ")$", "i" );
-                let reg = new RegExp( "\\s*(?:提[取示]|访问|查阅|密\\s*|艾|Extracted-code|key|password)[码碼]?\\s*[:： （(]?\\s*(" + site.regStr + ")|^\\s*[:：【\\[ （(]?\\s*(" + site.regStr + ")[】\\]]?$", "i" );
-                let code = reg.exec(a.textContent);
-                for ( let i = 10, current = a; !code && i > 0; i--, current = current.parentElement ) {
+
+        addCode(a) {
+            let mapped = this.mapHost(a.host),
+                site = this.sites[mapped],
+                codeRe = new RegExp("^" + site.regStr + "$", "i");
+            if (!codeRe.test(a.hash.slice(1))) {
+                let reg = new RegExp(
+                        "\\s*(?:提[取示]|访问|查阅|密\\s*|艾|Extracted-code|key|password|pwd)[码碼]?\\s*[:： （(]?\\s*(" +
+                            site.regStr +
+                            ")|^\\s*[:：【\\[ （(]?\\s*(" +
+                            site.regStr +
+                            ")[】\\]]?$",
+                        "i"
+                    ),
+                    code = reg.exec($(a).text());
+                for (
+                    let i = 10, current = a;
+                    !code && i > 0;
+                    i--, current = current.parentElement
+                ) {
                     let next = current;
                     while (!code) {
-                        console.log(next);
                         next = next.nextSibling;
                         if (!next || next.href) break;
-                        else code = reg.exec(next.textContent);
+                        else code = reg.exec($(next).text());
                     }
                 }
-                let store = this.sites[this.mapHost(a.host)].store;
+
                 if (code) {
                     let c = code[1] || code[2];
-                    if (store) GM_setValue( this.mapHost(a.host), c );
-                    else if (location.host.includes("zhihu.com")) {
-                        let span = document.createElement("span");
-                        span.classList.add("invisible");
-                        span.innerText = "#" + c;
-                        a.appendChild(span);
-                    }
-                    else a.hash = c;
-                }
-                else {
-                    if (store) GM_deleteValue( this.mapHost(a.host) );
-                    console.log("找不到code!");
+                    if (site.store) t.set(mapped, c);
+                    else if (locHost.includes("zhihu.com")) {
+                        let span = $("<span class='invisible'></span>");
+                        span.text("#" + c);
+                        $(a).append(span);
+                    } else a.hash = c;
+                } else {
+                    if (site.store) t.delete(mapped);
+                    t.clog("找不到code!");
                 }
             }
         },
-    
     };
+    let success_times = t.get("success_times");
+    if (!success_times) t.set("success_times", 0);
     
-    let dealedHost = YunDisk.mapHost(location.host);
-    if ( YunDisk.sites[dealedHost] ) YunDisk.autoFill(dealedHost);
-    
+    let dealedHost = YunDisk.mapHost(locHost);
+    if (YunDisk.sites[dealedHost]) YunDisk.autoFill(dealedHost);
     else {
-        let reg = /((?:http|https|\/|\%2F).*?\?|.*?\?.+?=)((?:http|\/|\%2F).+|([\w]+(?:(?:\.|%2E)[\w]+)+))/;
-        let excludeSites = GM_getValue("excludeSites", ["v.qq.com", "v.youku.com", "blog.csdn.net", "cloud.tencent.com", "translate.google.com",
-                                                            "domains.live.com", "passport.yandex.ru", "www.iconfont.cn", "baike.sogou.com", "www.kdocs.cn",
-                                                            "help.aliyun.com", "cn.bing.com", "service.weibo.com", "zhannei.baidu.com", "pc.woozooo.com"]);
         let RedirectPage = {
             sites: {
-                "show.bookmarkearth.com": { // 书签地球
+                "show.bookmarkearth.com": {
+                    // 书签地球
                     include: "http://show.bookmarkearth.com/view/",
                     selector: "a.open-in-new-window",
                 },
-                
-                "t.cn": { // 微博
+
+                "t.cn": {
+                    // 微博
                     include: "http://t.cn/",
                     selector: "a.m-btn-orange",
                 },
-                
-                "sunbox.cc": { // 阳光盒子
-                    include: "https://sunbox.cc/wp-content/themes/begin/go.php?url=",
+
+                "sunbox.cc": {
+                    // 阳光盒子
+                    include:
+                        "https://sunbox.cc/wp-content/themes/begin/go.php?url=",
                     selector: "a.alert-btn",
                 },
-                
-                "www.itdaan.com": { // 开发者知识库
+
+                "www.itdaan.com": {
+                    // 开发者知识库
                     include: "https://www.itdaan.com/link/",
-                    selector: "a.c-footer-a1"
+                    selector: "a.c-footer-a1",
+                },
+
+                "to.redircdn.com": {
+                    include:
+                        "https://to.redircdn.com/?action=image&url=",
+                    selector: "a.bglink",
                 },
                 
+                "link.csdn.net": {
+                    include: "https://link.csdn.net/?target=",
+                    selector: "a.loading-btn",
+                    timeout: 50,
+                }
             },
-            
-            // 获取真实链接并跳转
-            redirect: function(host) {
+
+            redirect(host) {
                 let site = this.sites[host];
-                let node = document.querySelector(site.selector);
-                if (node) location.href = node.href;
-            },
-            
-            // 维基百科及镜像
-            "wiki": function() {
-                let isZh = location.host.includes("zh");
-                let jumpToZh = GM_getValue("jumpToZh", true);
-                let a = document.querySelector('a.interlanguage-link-target[lang="zh"]');
-                let lastHref = null;
-                if (!isZh) {
-                    lastHref = location.href;
-                    if (jumpToZh) {
-                        history.pushState(null, null, lastHref);
-                        if (a) location.href = a.href;
-                        else showNotice("没有找到中文页面!"); // console.log("没有找到中文页面!");
+                if (locHref.includes(site.include)) {
+                    if (site.timeout) setTimeout(redirect, site.timeout);
+                    else redirect();
+                    
+                    function redirect() {
+                        let target = $(site.selector);
+                        if (target.length) location.replace(target[0].href);
+                        success_times = +t.get("success_times") + 1;
+                                t.set("success_times", success_times);
                     }
                 }
-                
-                // 注册菜单项控制是否自动切换中文
-                let menuID = GM_registerMenuCommand(`${jumpToZh?"[✔]":"[✖]"}自动切换中文`, autoJump);
+            },
+
+            wiki() {
+                let isZh = locHost.includes("zh"),
+                    jumpToZh = t.get("jumpToZh", true),
+                    a = $("a.interlanguage-link-target[lang='zh']");
+
+                if (!isZh && jumpToZh) {
+                    history.pushState(null, null, locHref);
+                    if (a.length) location.replace(a[0].href);
+                    else t.showNotice("没有找到中文页面!");
+                }
+
+                let menuID = t.registerMenu(
+                    `${jumpToZh ? "[✔]" : "[✖]"}自动切换中文`,
+                    autoJump
+                );
 
                 function autoJump() {
                     jumpToZh = !jumpToZh;
-                    GM_setValue("jumpToZh", jumpToZh);
-                    GM_unregisterMenuCommand(menuID);
-                    menuID = GM_registerMenuCommand(`${jumpToZh?"[✔]":"[✖]"}自动切换中文`, autoJump);
+                    t.set("jumpToZh", jumpToZh);
+                    t.unregisterMenu(menuID);
+                    menuID = t.registerMenu(
+                        `${jumpToZh ? "[✔]" : "[✖]"}自动切换中文`,
+                        autoJump
+                    );
                     if (!isZh && jumpToZh) {
-                        if (a) location.href = a.href;
-                        else showNotice("没有找到中文页面!");
+                        if (a.length) location.replace(a[0].href);
+                        else t.showNotice("没有找到中文页面!");
                     } else history.back();
                 }
             },
-            
-            // Mozilla开发者页面
-            "mozilla": function() {
-                let isZh = location.pathname.includes("zh-CN");
-                let jumpToZh = GM_getValue("jumpToZh", true), lastHref = null;
-                let options = document.querySelectorAll("#select_language>option,#language-selector>option");
-                if (!isZh) {
-                    if (jumpToZh) {
-                        for (let i = options.length - 1; i > 0; i--) {
-                            if ( options[i].value.startsWith("/zh-CN") ) {
-                                lastHref = options[i].value;
-                                break;
-                            }
+
+            mozilla() {
+                let isZh = locPath.includes("zh-CN"),
+                    jumpToZh = t.get("jumpToZh", true);
+                jump();
+                function jump() {
+                    if (!isZh && jumpToZh) {
+                        let result = /developer\.mozilla\.org\/(.+?)\//.exec(
+                            locHref
+                        );
+                        t.clog(result);
+                        if (result) {
+                            let zh_url = locHref.replace(result[1], "zh-CN");
+                            history.pushState(null, null, locHref);
+                            location.replace(zh_url);
                         }
-                        if (lastHref) {
-                            location.href = lastHref;
-                        } else showNotice("没有找到中文页面!");
                     }
                 }
-                
-                // 注册菜单项控制是否自动切换中文
-                let menuID = GM_registerMenuCommand(`${jumpToZh?"[✔]":"[✖]"}自动切换中文`, autoJump);
+                let menuID = t.registerMenu(
+                    `${jumpToZh ? "[✔]" : "[✖]"}自动切换中文`,
+                    autoJump
+                );
 
                 function autoJump() {
                     jumpToZh = !jumpToZh;
-                    GM_setValue("jumpToZh", jumpToZh);
-                    GM_unregisterMenuCommand(menuID);
-                    menuID = GM_registerMenuCommand(`${jumpToZh?"[✔]":"[✖]"}自动切换中文`, autoJump);
-                    if (!isZh && jumpToZh) {
-                        for (let i = options.length - 1; i > 0; i--) {
-                            if ( lastHref = options[i].value, lastHref.startsWith("/zh-CN") ) break;
-                        }
-                        if (lastHref) location.href = lastHref;
-                        else showNotice("没有找到中文页面!");
-                    } else history.back();
+                    t.set("jumpToZh", jumpToZh);
+                    t.unregisterMenu(menuID);
+                    menuID = t.registerMenu(
+                        `${jumpToZh ? "[✔]" : "[✖]"}自动切换中文`,
+                        autoJump
+                    );
+                    jump();
                 }
             },
         };
-        
-        // 跳转页面
-        if ( RedirectPage.sites[location.host] ) RedirectPage.redirect(location.host);
-        else if( !excludeSites.some( s => location.host.includes(s) ) && reg.test(location.href) ) location.replace(decodeURIComponent(reg.exec(location.href)[2]));
-        // 维基百科及镜像页面
-        else if ( location.host.match(/.+wiki(?:\.sxisa|pedia)\.org/) ) RedirectPage["wiki"]();
-        
-        // 点击元素(文本或链接)
+
+        if (RedirectPage.sites[locHost]) RedirectPage.redirect(locHost);
+        else if (locHost.match(/.+wiki(?:\.sxisa|pedia)\.org/))
+            RedirectPage.wiki();
         else {
-            // Mozilla开发者页面
-            if ( location.host == "developer.mozilla.org") RedirectPage["mozilla"]();
-            
-            // 页面监听
-            document.addEventListener("mouseup", function(clickObj) {
-                let e = clickObj.target ?? clickObj.originalTarget, isTextToLink;
-                if (e && !e.href) { // 非链接
-                    let flag = true, selectNode = null;
-                    for ( let current = e, limit = 5; current.localName !== "body" && limit > 0; current = current.parentElement, limit-- ) {
+            if (locHost === "developer.mozilla.org") RedirectPage.mozilla();
+
+            $(document).on("mouseup", function (obj) {
+                let e = obj.originalEvent.explicitOriginalTarget || obj.target,
+                    isTextToLink = false;
+                // t.clog(obj);
+                if (e && !e.href) {
+                    let flag = true,
+                        selectNode = null;
+                    for (
+                        let current = e, limit = 5;
+                        current.localName !== "body" && limit > 0;
+                        current = current.parentElement, limit--
+                    ) {
                         if (current.localName === "a") {
                             e = current;
                             break;
-                        } else if ( ["code", "pre"].some( tag => tag === current.localName) ) { // 代码块
-                            let selection = getSelection(), text = selection.toString();
-                            if ( url_regexp.test( text ) ) selectNode = selection.anchorNode || selection.focusNode;
+                        } else if (
+                            ["code", "pre"].some(
+                                (tag) => tag === current.localName
+                            )
+                        ) {
+                            let selection = getSelection(),
+                                text = selection.toString();
+                            if (url_regexp.test(text))
+                                selectNode =
+                                    selection.anchorNode || selection.focusNode;
                             else flag = false;
                             break;
                         }
                     }
+
                     if (e.localName !== "a" && flag) {
-                        let node = selectNode || clickObj.explicitOriginalTarget;
-                        if (node.nodeValue) e = text2Links(node);
-                        else 
-                            e = textToLink(e);
-                        if (e) isTextToLink = true;
+                        let node = 
+                            selectNode ||
+                            obj.originalEvent.explicitOriginalTarget;
+                        if (node && node.nodeValue) e = text2Link(node);
+                        else e = textToLink(e);
+                        if (e) 
+                            isTextToLink = true;
                     }
                 }
-                if (e && e.localName === "a") { // 链接
+
+                if (e && e.localName === "a") {
                     let a = e;
-                    if ( location.href.includes('mod.3dmgame.com/mod/') ) { // mod.3dmgame.com
-                        a.search = '3dmgame.com';
+                    if (locHref.includes("mod.3dmgame.com/mod/"))
+                        a.search = "3dmgame.com";
+                    if (isLinkText(a)) {
+                        if (url_regexp.test(a.innerText)) 
+                            a.href = t.http(a.innerText, true);
                     }
 
-                    if ( isLinkText(a) ) { // 链接文本为真实链接
-                        if ( url_regexp.test(a.innerText) ) a.href = a.innerText.startsWith("http") ? a.innerText : "https://" + a.innerText; 
-                    }
-                    // 含真实链接的跳转链接
                     cleanRedirectLink(a);
-                    
-                    if ( a.host.includes("wikipedia.org") ) { // 维基百科
-                        a.href = a.href.replace("wikipedia.org", "wiki.sxisa.org");
-                    } else if ( a.host.includes("developers.google.com") ) { // 谷歌开发者
-                        a.href = a.href.replace("developers.google.com", "developers.google.cn")
-                    } else if (YunDisk.sites[YunDisk.mapHost(a.host)]) { // 网盘
-                        YunDisk.addCode2(a);
+
+                    if (a.host.includes("wikipedia.org")) {
+                        // 维基百科
+                        a.href = a.href.replace(
+                            "wikipedia.org",
+                            "wiki.sxisa.org"
+                        );
+                    } else if (a.host.includes("developers.google.com")) {
+                        // 谷歌开发者
+                        a.href = a.href.replace(
+                            "developers.google.com",
+                            "developers.google.cn"
+                        );
+                    } else if (YunDisk.sites[YunDisk.mapHost(a.host)]) {
+                        // 网盘
+                        YunDisk.addCode(a);
                         if (isTextToLink) a.click();
                     }
+
                     add_blank(a);
                 }
             });
+
+            let textLength = t.get("textLength", 200);
+
+            // let menuID = t.registerMenu(
+            //     `设置文本字数限制(${textLength})`,
+            //     limitText
+            // );
+
+            // function limitText() {
+            //     let input = prompt(
+            //         "请输入文本字数限制: ",
+            //         t.get("textLength", 200)
+            //     );
+            // }
+            let url_regexp_g = new RegExp(
+                        "\\b(" +
+                            "(\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#]+|(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#]*)?)" +
+                            "|" +
+                            "ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/" + 
+                            "|" +
+                            "magnet:\\?xt=urn:btih:\\w{40}(&[\\w\\s]+)?" +
+                            ")",
+                        "ig"
+                    );
             
-            
-            // 文本字数限制
-            let textLength = GM_getValue("textLength", 200);
-            // 注册菜单项限制文本字数
-            /*let menuID = GM_registerMenuCommand(`设置文本字数限制(${textLength})`, limitText);
-            
-            function limitText() {
-                let input = prompt("请输入文本字数限制: ", GM_getValue("textLength", 200));
-                if (+input) {
-                    GM_setValue("textLength", +input);
-                    GM_unregisterMenuCommand(menuID);
-                    menuID = GM_registerMenuCommand(`设置文本字数限制(${+input})`, limitText);
-                }
-            }*/
-            
-            // 文本转链接
             function textToLink(e) {
-                if ( !["body", "code", "pre"].some( tag => tag === e.localName) && !["www.google"].some( h => location.host.includes(h) ) ) {
-                    let span = null, count = 0;
-                    for (let i = e.childNodes.length-1, limit = 10; i >= 0 && limit > 0; i--) {
+                if (
+                    !["body", "code", "pre"].some(
+                        (tag) => tag === e.localName
+                    ) &&
+                    !["www.google"].some((h) => locHost.includes(h))
+                ) {
+                    let span = null,
+                        count = 0;
+                    for (
+                        let i = e.childNodes.length - 1, limit = 20;
+                        i >= 0 && limit > 0;
+                        i--
+                    ) {
                         let child = e.childNodes[i];
-                        if ( !["a", "br", "code", "pre", "img", "script"].some( tag => tag === child.localName ) // 剔除遍历节点类型
-                            && child.className !== "textToLink"
-                            && child.textContent.length < textLength ) { // 限制文本字数
-                            let result = url_regexp.exec(child.textContent);
-                            if ( result && !result[0].includes("@") ) {
-                                span = document.createElement("span");
-                                span.className = "textToLink";
-                                span.innerHTML = child.textContent.replace(url_regexp,
-                                                                 result[0].startsWith("http")
-                                                                 ? '<a href="$1" target="_blank">$1</a>'
-                                                                 : '<a href="https://$1" target="_blank">$1</a>');
-                                child.parentNode.replaceChild(span, child);
-                                count++;
+                        if (
+                            !["a", "br", "code", "pre", "img", "script"].some(
+                                (tag) => tag === child.localName
+                            ) && 
+                            child.className !== "textToLink" &&
+                            child.textContent.length < textLength
+                        ) {
+                            let text = t.clean(child.textContent, "防和谐"), result = url_regexp_g.test(text);
+                            if (result) {
+                                span = $("<span class='textToLink'></span>");
+                                span.html(
+                                    text.replace(url_regexp_g, function ($1) {
+                                        count++;
+                                        if ($1.includes("@")) return `<a href="mailto:${$1}">${$1}</a>`;
+                                        return $1.startsWith("http") ||
+                                            $1.includes("magnet") ||
+                                            $1.includes("ed2k")
+                                            ? `<a href="${$1}" target="_blank">${$1}</a>`
+                                            : `<a href="https://${$1}" target="_blank">${$1}</a>`;
+                                    })
+                                );
+                                $(child).replaceWith(span);
                             }
                             limit--;
                         }
                     }
-                    
-                    return count == 1 && (span && span.firstElementChild);
-                }
-            }
-            
-            function text2Link(node) {
-                let result = url_regexp.exec(node.nodeValue), span = null;
-                if ( result  && !result[0].includes("@")) {
-                    span = document.createElement("span");
-                    span.className = "textToLink";
-                    span.innerHTML = node.nodeValue.replace(url_regexp,
-                                                     result[0].startsWith("http")
-                                                     ? '<a href="$1" target="_blank">$1</a>'
-                                                     : '<a href="https://$1" target="_blank">$1</a>');
-                    node.parentNode.replaceChild(span, node);
-                }
-                return span && span.firstElementChild;
-            }
-            
-            function text2Links(node) {
-                if ( node.nodeValue.length < textLength ) {
-                    let url_regexp_g = new RegExp('\\b('
-                                                  +
-                                                  'https?:\\/\\/[^\\s+"\\\'<>，\\[\\]（）\\*\\u4E00-\\u9FFF]+'
-                                                  +'|'+
-                                                  'ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/'
-                                                  +'|'+
-                                                  'magnet:\\?xt=urn:btih:\\w{40}(&[\\w\\s]+)?'
-                                                  +')','ig')
-                    let result = url_regexp_g.exec(node.nodeValue), span = null, count = 0;
-                    if ( result && !result[0].includes("@") ) {
-                        // console.log(result);
-                        span = document.createElement("span");
-                        span.className = "textToLink";
-                        span.innerHTML = node.nodeValue.replace(url_regexp_g, function($1) {
-                                                         count++;
-                                                         return $1.startsWith("http") || $1.includes("magnet") || $1.includes("ed2k")
-                                                         ? `<a href="${$1}" target="_blank">${$1}</a>`
-                                                         : `<a href="https://${$1}" target="_blank">${$1}</a>`;
-                        } );
-                        node.parentNode.replaceChild(span, node);
+                    if (count) {
+                        success_times = +t.get("success_times") + 1;
+                        t.set("success_times", success_times);
                     }
-                    // console.log(count);
-                    return count == 1 && (span && span.firstElementChild);
+                    return count == 1 && span && span.children()[0];
                 }
-            }
-            
-            // 链接文本为真实链接
-            function isLinkText(a) {
-                let keywords = ["www.sunweihu.com/go/?url=", "jump.bdimg.com/safecheck/index?url=", "jump2.bdimg.com/safecheck/index?url=", "zhouxiaoben.info/wp-content/themes/begin/go.php?url="];
-                return keywords.some( k => a.href.includes(k) );
             }
 
-            // 注册菜单项添加例外域名
-            GM_registerMenuCommand("添加例外域名", addExcludeSite);
+            function text2Link(node) {
+                if (node.nodeValue.length < textLength) {
+                    let text = t.clean(node.nodeValue, "防和谐"), result = url_regexp_g.test(text),
+                        span = null,
+                        count = 0;
+                    if (result) {
+                        span = $("<span class='text2Link'></span>");
+                        span.html(
+                            text.replace(url_regexp_g, function ($1) {
+                                    count++;
+                                    if ($1.includes("@")) return `<a href="mailto:${$1}">${$1}</a>`;
+                                    return $1.startsWith("http") ||
+                                        $1.includes("magnet") ||
+                                        $1.includes("ed2k")
+                                        ? `<a href="${$1}" target="_blank">${$1}</a>`
+                                        : `<a href="https://${$1}" target="_blank">${$1}</a>`;
+                                })
+                        );
+                        $(node).replaceWith(span);
+                    }
+                    if (count) {
+                        success_times = +t.get("success_times") + 1;
+                        t.set("success_times", success_times);
+                    }
+                    return count == 1 && span && span.children()[0];
+                }
+            }
+
+            function isLinkText(a) {
+                let keywords = [
+                    "www.sunweihu.com/go/?url=",
+                    "jump.bdimg.com/safecheck/index?url=",
+                    "jump2.bdimg.com/safecheck/index?url=",
+                    "zhouxiaoben.info/wp-content/themes/begin/go.php?url=",
+                    "https://to.redircdn.com/?",
+                    "www.423down.com/wp-content/plugins/momgo/go.php?url="
+                ];
+                return keywords.some((k) => a.href.includes(k));
+            }
+
+            let excludeSites = t.get("excludeSites", [
+                "v.qq.com",
+                "v.youku.com",
+                "blog.csdn.net",
+                "cloud.tencent.com",
+                "translate.google.com",
+                "domains.live.com",
+                "passport.yandex.ru",
+                "www.iconfont.cn",
+                "baike.sogou.com",
+                "www.kdocs.cn",
+                "help.aliyun.com",
+                "cn.bing.com",
+                "service.weibo.com",
+                "zhannei.baidu.com",
+                "pc.woozooo.com",
+            ]);
+
+            t.registerMenu("添加例外域名", addExcludeSite);
 
             // 添加例外域名
             function addExcludeSite() {
-                let input = prompt("输入的域名下的链接不会被净化: ", location.host);
+                let input = prompt("输入的域名下的链接不会被净化: ", locHost);
                 if (input) {
-                    if ( /[\w]+(\.[\w]+)+/.test(input) ) {
-                        if ( !excludeSites.some( s => s.includes(input) ) ) {
+                    if (/[\w]+(\.[\w]+)+/.test(input)) {
+                        if (!excludeSites.some((s) => s.includes(input))) {
                             excludeSites.push(input);
-                            GM_setValue("excludeSites", excludeSites);
-                        }
-                        else showNotice(`例外域名 <${input}> 已存在!!!`);
-                    }
-                    else showNotice(`<${input}> 不是有效域名!!!`);
+                            t.set("excludeSites", excludeSites);
+                        } else t.showNotice(`例外域名 <${input}> 已存在!!!`);
+                    } else t.showNotice(`<${input}> 不是有效域名!!!`);
                 }
             }
-            function cleanRedirectLink(a) { // 净化跳转链接
-                let result = reg.exec(a.href);
+
+            function cleanRedirectLink(a) {
+                // 净化跳转链接
+                let reg = /((?:http|https|\/|\%2F).*?\?|.*?\?.+?=)((?:http|\/|\%2F).+|([\w]+(?:(?:\.|%2E)[\w]+)+))/,
+                    result = reg.exec(a.href);
                 if (result) {
-                    let temp = decodeURIComponent( decodeURIComponent(result[2]) );
-                    if (!(
-                         decodeURIComponent(location.href).includes(temp.split("&")[0]) ||
-                         ( result[3] && result[3].includes(location.host) ) ||
-                         excludeSites.some( s => result[1].includes(s) ) ||
-                         YunDisk.sites[YunDisk.mapHost(a.host)]
-                       )) {
-                        let href = decodeURIComponent(decodeURIComponent(result[3] ? 
-                                                                         "http://" + result[3] : 
-                                                                         result[2].startsWith("http") ? 
-                                                                         result[2] : 
-                                                                         location.origin + result[2]) );
-                        if (a.title) a.title += "\n" + decodeURIComponent(a.href);
+                    let temp = decodeURIComponent(
+                        decodeURIComponent(result[2])
+                    );
+                    if (
+                        !(
+                            decodeURIComponent(location.href).includes(
+                                temp.split("&")[0]
+                            ) ||
+                            (result[3] && result[3].includes(location.host)) ||
+                            excludeSites.some((s) => result[1].includes(s)) ||
+                            YunDisk.sites[YunDisk.mapHost(a.host)]
+                        )
+                    ) {
+                        let href = decodeURIComponent(
+                            decodeURIComponent(
+                                result[3]
+                                    ? "http://" + result[3]
+                                    : result[2].startsWith("http")
+                                    ? result[2]
+                                    : location.origin + result[2]
+                            )
+                        );
+                        if (a.title)
+                            a.title += "\n" + decodeURIComponent(a.href);
                         else a.title = decodeURIComponent(a.href);
-                        a.href = href.replace(/______/g, '.');
+                        if (["c.pc.qq.com","mail.qq.com"].some((h) => a.host == h))
+                            a.href = href.split("&")[0];
+                        else a.href = href;
+                        success_times = +t.get("success_times") + 1;
+                        t.set("success_times", success_times);
                     }
                 }
             }
-            
-            let defaultTargetSites = GM_getValue("defaultTargetSites", []);
-            let isAddBlank = GM_getValue("isAddBlank", false);
-            let isDefault = defaultTargetSites.some( s => s == location.host );
+
+            let defaultTargetSites = t.get("defaultTargetSites", []);
+            let isAddBlank = t.get("isAddBlank", false);
+            let isDefault = defaultTargetSites.some((s) => s == location.host);
             // 注册菜单项该站链接保持默认打开方式
             if (!isDefault) {
-                let menuID2 = GM_registerMenuCommand("该站链接保持默认打开方式", function() {
-                    defaultTargetSites.push(location.host);
-                    GM_setValue("defaultTargetSites", defaultTargetSites);
-                    isDefault = defaultTargetSites.some( s => s == location.host)
-                    GM_unregisterMenuCommand(menuID2);
-                    GM_unregisterMenuCommand(menuID);
-                });
-                
+                let menuID2 = t.registerMenu(
+                    "该站链接保持默认打开方式",
+                    function () {
+                        defaultTargetSites.push(location.host);
+                        t.set("defaultTargetSites", defaultTargetSites);
+                        isDefault = defaultTargetSites.some(
+                            (s) => s == location.host
+                        );
+                        t.unregisterMenu(menuID2);
+                        t.unregisterMenu(menuID);
+                    }
+                );
+
                 // 注册菜单项启停在新标签打开链接
-                let menuID = GM_registerMenuCommand(`${isAddBlank?"[✔]":"[✖]"}在新标签打开链接`, addBlank);
+                let menuID = t.registerMenu(
+                    `${isAddBlank ? "[✔]" : "[✖]"}在新标签打开链接`,
+                    addBlank
+                );
 
                 // 启停在新标签打开链接
                 function addBlank() {
                     isAddBlank = !isAddBlank;
-                    GM_setValue("isAddBlank", isAddBlank);
-                    GM_unregisterMenuCommand(menuID);
-                    menuID = GM_registerMenuCommand(`${isAddBlank?"[✔]":"[✖]"}在新标签打开链接`, addBlank);
+                    t.set("isAddBlank", isAddBlank);
+                    t.unregisterMenu(menuID);
+                    menuID = t.registerMenu(
+                        `${isAddBlank ? "[✔]" : "[✖]"}在新标签打开链接`,
+                        addBlank
+                    );
                 }
             }
-            
+
             // 给链接添加[target="_blank"]属性
             function add_blank(a) {
                 if (isAddBlank && !isDefault) {
-                    let result = a.target == "_blank" ||
-                                 /javascript[\w:;()]+/.test(a.href) ||
-                                 /\/\w+-\d+-\d+\.html|.+page\/\d+|category-\d+_?\d*/.test(a.href) || /[前后上下首末].+[页篇张]|^\.*\s*\d+\s*\.*$|^next$|^previous$/i.test(a.innerText) || ["prev", "next"].some(r => r == a.attributes.rel?.nodeValue) || ["prev", "next", 'nxt'].some(r => a.className.includes(r)) ||
-                                 (/thread-\d+-\d+-\d+/.test(a.href) ? a.attributes.href.nodeValue.startsWith("#") : !/^(?:http|\/\/).+/.test(a.attributes.href.nodeValue)) ||
-                                 a.href == (location.origin + "/") ||
-                                 a.href.endsWith(".user.js");
-                    // 移除论坛帖子链接的点击事件
-                    if (/thread-\d+-\d+-\d+/.test(a.href)) a.onclick = null;
+                    let result =
+                            a.target == "_blank" ||
+                            /javascript[\w:;()]+/.test(a.href) ||
+                            /\/\w+-\d+-\d+\.html|.+page\/\d+|category-\d+_?\d*/.test(
+                                a.href
+                            ) ||
+                            /[前后上下首末].+[页篇张]|^\.*\s*\d+\s*\.*$|^next$|^previous$/i.test(
+                                a.innerText
+                            ) ||
+                            ["prev", "next"].some(
+                                (r) =>
+                                    r == a.attributes.rel &&
+                                    a.attributes.rel.nodeValue
+                            ) ||
+                            ["prev", "next", "nxt"].some((r) =>
+                                a.className.includes(r)
+                            ) ||
+                            a.href == location.origin + "/" ||
+                            a.href.endsWith(".user.js"),
+                        relative = t.get("relative", false);
+                    if (!relative)
+                        result =
+                            result ||
+                            !/^(?:http|\/\/).+/.test(
+                                a.attributes.href.nodeValue
+                            );
                     if (!result) a.target = "_blank";
-                }                
+                }
             }
         }
     }
-    
-}();
+});
