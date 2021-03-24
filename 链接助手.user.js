@@ -2,9 +2,9 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7/LinkHelper
 // @match           *://*/*
-// @version         1.3.2
+// @version         1.3.4
 // @author          一个北七
-// @run-at          document-end
+// @run-at          document-body
 // @description     常用网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、Mozilla开发者自动切换中文(可控), 维基百科、谷歌开发者链接转为镜像链接; 新标签打开链接(可控)
 // @license         GPL-3.0 License
 // @grant           GM_registerMenuCommand
@@ -13,6 +13,7 @@
 // @grant           GM_info
 // @grant           GM_setValue
 // @grant           GM_getValue
+// @grant           GM_deleteValue
 // @noframes
 // @icon            https://gitee.com/oneNorth7/pics/raw/master/picgo/link-helper.png
 // @created         2021/1/26 下午18:03:47
@@ -37,7 +38,7 @@
         let lines = document.querySelectorAll('div.down-line');
         if (lines.length) lines[lines.length-1].appendChild(lines[0].previousElementSibling.previousElementSibling);
     }
-    else if (/https:\/\/www\.mikuclub\.org\/\d+/.test(location.href)) { // 初音社
+    else if (/https:\/\/www\.mikuclub\.xyz\/\d+/.test(location.href)) { // 初音社
         let password = document.querySelector('.password1');
         if (password) document.querySelector('a.download').hash = password.value;
     }
@@ -155,7 +156,7 @@
             "www.90pan.com": { // 90网盘
                 inputSelector: "#code",
                 buttonSelector: "button.btn-info", 
-                regStr: "[a-z\\d]{4, 6}",
+                regStr: "[a-z\\d]{4,6}",
                 timeout: 10,
                 clickTimeout: 500
             },
@@ -169,10 +170,10 @@
             },
             
             "pan.xunlei.com": { // 迅雷云盘
-                inputSelector: "input.td-input__inner",
-                buttonSelector: "button.td-button", 
+                inputSelector: "#__nuxt input.td-input__inner",
+                buttonSelector: "#__nuxt button.td-button", 
                 regStr: "[a-z\\d]{4}",
-                timeout: 1500,
+                timeout: 3000,
                 clickTimeout: 10,
                 store: true,
                 inputEvent: true,
@@ -235,6 +236,16 @@
             },
             
             "pan.mebk.org": { // 马恩资料库云盘
+                inputSelector: "#pwd",
+                buttonSelector: "button.MuiButton-root", 
+                regStr: "[a-z\\d]{6}",
+                timeout: 500,
+                clickTimeout: 10,
+                store: true,
+                react: true
+            },
+            
+            "pan.bilnn.com": { // 比邻云盘
                 inputSelector: "#pwd",
                 buttonSelector: "button.MuiButton-root", 
                 regStr: "[a-z\\d]{6}",
@@ -350,7 +361,7 @@
         let reg = /((?:http|https|\/|\%2F).*?\?|.*?\?.+?=)((?:http|\/|\%2F).+|([\w]+(?:(?:\.|%2E)[\w]+)+))/;
         let excludeSites = GM_getValue("excludeSites", ["v.qq.com", "v.youku.com", "blog.csdn.net", "cloud.tencent.com", "translate.google.com",
                                                             "domains.live.com", "passport.yandex.ru", "www.iconfont.cn", "baike.sogou.com", "www.kdocs.cn",
-                                                            "help.aliyun.com", "cn.bing.com", "service.weibo.com", "zhannei.baidu.com"]);
+                                                            "help.aliyun.com", "cn.bing.com", "service.weibo.com", "zhannei.baidu.com", "pc.woozooo.com"]);
         let RedirectPage = {
             sites: {
                 "show.bookmarkearth.com": { // 书签地球
