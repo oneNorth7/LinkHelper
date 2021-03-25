@@ -17,6 +17,7 @@
 // @grant           GM_getValue
 // @grant           GM_deleteValue
 // @require         https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
+// @require         https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js
 // @created         2021年3月19日 09:48:14
 // ==/UserScript==
 
@@ -91,6 +92,42 @@ $(function () {
                 this.clog(times);
                 times--;
             }, 100);
+        },
+
+        increase() {
+            success_times = +this.get("success_times") + 1;
+            this.set("success_times", success_times);
+        },
+
+        subscribe() {
+            let isFollowed = t.get('isFollowed', false), least_times = t.get('least_times', 100);
+            success_times = +this.get("success_times");
+            if (success_times > least_times && !isFollowed) {
+                Swal.fire({
+                          title: '\u5173\u6ce8\u516c\u4f17\u53f7\uff0c\u4e0d\u8ff7\u8def\uff01',
+                          html: $(
+                        `<div><img style="width: 300px;margin: 5px auto;" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/oneNorth7.png"><p style="font-size: 16px;color: red;">\u7b2c\u4e00\u65f6\u95f4\u83b7\u53d6<span style="color: gray;font-weight: 800;">\u3010\u94fe\u63a5\u52a9\u624b\u3011</span>\u66f4\u65b0\u63a8\u9001\uff01</p></div>`
+                    )[0],
+                          showCancelButton: true,
+                          allowOutsideClick: false,
+                          confirmButtonColor: '#d33',
+                          confirmButtonText: '\u5df2\u5173\u6ce8\uff0c\u4e0d\u518d\u63d0\u9192\uff01',
+                          cancelButtonColor: '#3085d6',
+                          cancelButtonText: '\u7a0d\u540e\u5173\u6ce8',
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            Swal.fire({
+                              position: 'center',
+                              icon: 'success',
+                              title: '\u611f\u8c22\u5173\u6ce8\uff01\uff01\uff01',
+                              text: '\u4e00\u4e2a\u5317\u4e03\u4f1a\u7ee7\u7eed\u4e0d\u9057\u4f59\u529b\u5730\u521b\u4f5c\u66f4\u591a\u5b9e\u7528\u5de5\u5177',
+                              showConfirmButton: false,
+                              timer: 2000
+                            });
+                            t.set('isFollowed', true);
+                          } else t.set('least_times', least_times + 50);
+                        });
+            }
         },
     };
 
@@ -408,8 +445,8 @@ $(function () {
                                         }, site.clickTimeout);
                                     else button[0].click();
                                 }
-                                success_times = +t.get("success_times") + 1;
-                                t.set("success_times", success_times);
+                                t.increase();
+                                t.subscribe();
                             } else {
                                 t.clog("未找到合适的提取码!");
                             }
@@ -520,8 +557,7 @@ $(function () {
                     function redirect() {
                         let target = $(site.selector);
                         if (target.length) location.replace(target[0].href);
-                        success_times = +t.get("success_times") + 1;
-                                t.set("success_times", success_times);
+                        t.increase();
                     }
                 }
             },
@@ -737,10 +773,7 @@ $(function () {
                             limit--;
                         }
                     }
-                    if (count) {
-                        success_times = +t.get("success_times") + 1;
-                        t.set("success_times", success_times);
-                    }
+                    if (count) t.increase();
                     return count == 1 && span && span.children()[0];
                 }
             }
@@ -765,10 +798,7 @@ $(function () {
                         );
                         $(node).replaceWith(span);
                     }
-                    if (count) {
-                        success_times = +t.get("success_times") + 1;
-                        t.set("success_times", success_times);
-                    }
+                    if (count) t.increase();
                     return count == 1 && span && span.children()[0];
                 }
             }
@@ -851,8 +881,7 @@ $(function () {
                         if (["c.pc.qq.com","mail.qq.com"].some((h) => a.host == h))
                             a.href = href.split("&")[0];
                         else a.href = href;
-                        success_times = +t.get("success_times") + 1;
-                        t.set("success_times", success_times);
+                        t.increase();
                     }
                 }
             }
