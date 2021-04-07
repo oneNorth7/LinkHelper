@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name            链接助手
-// @namespace       https://github.com/oneNorth7/LinkHelper
+// @namespace       https://github.com/oneNorth7
 // @match           *://*/*
-// @version         1.5.0
+// @version         1.6.0
 // @author          一个北七
 // @run-at          document-body
 // @description     常用网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、Mozilla开发者自动切换中文(可控), 维基百科、谷歌开发者链接转为镜像链接; 新标签打开链接(可控)
@@ -16,6 +16,7 @@
 // @grant           GM_setValue
 // @grant           GM_getValue
 // @grant           GM_deleteValue
+// @grant           GM_xmlhttpRequest
 // @require         https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js
 // @created         2021年3月19日 09:48:14
@@ -73,7 +74,13 @@ $(function () {
                 ? link
                 : (s ? "https://" : "http://") + link;
         },
-
+        
+        title(a) {
+            if (a.title)
+                a.title += "\n" + decodeURIComponent(a.href);
+            else a.title = decodeURIComponent(a.href);
+        },
+        
         hashcode() {
             return locHash.slice(1);
         },
@@ -131,7 +138,7 @@ $(function () {
         },
     };
 
-    let url_regexp = /(\w(?:[\w._-])+@\w[\w\._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu)|(?:https?:\/\/|www\.)[\w_\-\.~\/\=\?&#]+|(?:\w[\w._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\/[\w_\-\.~\/\=\?&#]*)?)/i;
+    let url_regexp = /(\w(?:[\w._-])+@\w[\w\._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu)|(?:https?:\/\/|www\.)[\w_\-\.~\/\=\?&#%\+:]+|(?:\w[\w._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\/[\w_\-\.~\/\=\?&#%\+:]*)?)/i;
     
     let Preprocess = {
         "www.38hack.com": function () {
@@ -209,6 +216,15 @@ $(function () {
                         if (result) child.href += "#" + result[1];
                     }
                 }
+            }
+        },
+        
+        "www.gopojie.net": function () {
+            if (/https:\/\/www\.gopojie\.net\/download\?post_id=/.test(locHref)) {
+                setTimeout(() => {
+                    let a = $('a.empty.button'), url = a.prop('href'), code = $('#tq').attr('data-clipboard-text');
+                    if (url) a.prop('href', url + '#' + code);
+                }, 1000);
             }
         },
     };
@@ -341,7 +357,8 @@ $(function () {
                 inputSelector: "input",
                 buttonSelector: "a.btn-token",
                 regStr: "[a-z\\d]{4}",
-                timeout: 500,
+                timeout: 100,
+                clickTimeout: 10,
                 inputEvent: true,
                 store: true,
             },
@@ -376,16 +393,6 @@ $(function () {
                 react: true,
             },
 
-            "pan.bilnn.com": {
-                // 比邻云盘
-                inputSelector: "#pwd",
-                buttonSelector: "button.MuiButton-root",
-                regStr: "[a-z\\d]{6}",
-                timeout: 500,
-                store: true,
-                react: true,
-            },
-
             "mega.nz": {
                 regExp: /^[a-z\d\-_]{22}$/i,
             },
@@ -394,7 +401,8 @@ $(function () {
         mapHost(host) {
             return host
                 .replace(/.*lanzou[isx]?.com/, "lanzou.com")
-                .replace(/quqi\.\w+\.com/, "quqi.com");
+                .replace(/quqi\.\w+\.com/, "quqi.com")
+                .replace('feixin.10086.cn', '139.com');
         },
 
         autoFill(host) {
@@ -427,7 +435,11 @@ $(function () {
                                             }
 
                                             clearInterval(tid);
-                                            button.click();
+                                            if (site.clickTimeout)
+                                                setTimeout(() => {
+                                                    button[0].click();
+                                                }, site.clickTimeout);
+                                            else button[0].click();
                                         }
                                     }, 1000);
                                 } else if (site.react) {
@@ -436,7 +448,11 @@ $(function () {
                                     let tracker = input[0]._valueTracker;
                                     if (tracker) tracker.setValue(lastValue);
                                     input.trigger("input");
-                                    button.click();
+                                    if (site.clickTimeout)
+                                        setTimeout(() => {
+                                            button[0].click();
+                                        }, site.clickTimeout);
+                                    else button[0].click();
                                 } else {
                                     input.val(code);
                                     if (site.clickTimeout)
@@ -490,11 +506,12 @@ $(function () {
                 if (code) {
                     let c = code[1] || code[2];
                     if (site.store) t.set(mapped, c);
-                    else if (locHost.includes("zhihu.com")) {
+                    if (locHost.includes("zhihu.com")) {
                         let span = $("<span class='invisible'></span>");
                         span.text("#" + c);
                         $(a).append(span);
-                    } else a.hash = c;
+                    }
+                    a.hash = c;
                 } else {
                     if (site.store) t.delete(mapped);
                     t.clog("找不到code!");
@@ -542,10 +559,22 @@ $(function () {
                 },
                 
                 "link.csdn.net": {
+                    // CSDN
                     include: "https://link.csdn.net/?target=",
                     selector: "a.loading-btn",
                     timeout: 50,
-                }
+                },
+                
+                "niao.su": {
+                    // 不死鸟
+                    include: "https://niao.su/go/",
+                    selector: "a.c-footer-a1",
+                },
+                
+                "support.qq.com": {
+                    include: "support.qq.com/products/",
+                    selector: "span.link_url",
+                },
             },
 
             redirect(host) {
@@ -556,7 +585,7 @@ $(function () {
                     
                     function redirect() {
                         let target = $(site.selector);
-                        if (target.length) location.replace(target[0].href);
+                        if (target.length) location.replace(target[0].href || target[0].innerText);
                         t.increase();
                     }
                 }
@@ -627,9 +656,8 @@ $(function () {
                 }
             },
         };
-
-        if (RedirectPage.sites[locHost]) RedirectPage.redirect(locHost);
-        else if (locHost.match(/.+wiki(?:\.sxisa|pedia)\.org/))
+        
+        if (locHost.match(/.+wiki(?:\.sxisa|pedia)\.org/))
             RedirectPage.wiki();
         else {
             if (locHost === "developer.mozilla.org") RedirectPage.mozilla();
@@ -698,6 +726,12 @@ $(function () {
                             "developers.google.com",
                             "developers.google.cn"
                         );
+                    } else if (a.host.includes("chrome.google.com")) {
+                        // 谷歌应用商店
+                        if (navigator.appVersion.includes('Chrome') && confirm('是否跳转到<www.crx4chrome.com>镜像站?')) {
+                            t.title(a);
+                            a.href = a.href.replace(/chrome\.google\.com\/webstore\/detail[\/\w\-%]*(?=\w{32})/i, 'www.crx4chrome.com/extensions/');
+                        }
                     } else if (YunDisk.sites[YunDisk.mapHost(a.host)]) {
                         // 网盘
                         YunDisk.addCode(a);
@@ -707,7 +741,9 @@ $(function () {
                     add_blank(a);
                 }
             });
-
+            
+            if (RedirectPage.sites[locHost]) RedirectPage.redirect(locHost);
+            
             let textLength = t.get("textLength", 200);
 
             // let menuID = t.registerMenu(
@@ -723,7 +759,7 @@ $(function () {
             // }
             let url_regexp_g = new RegExp(
                         "\\b(" +
-                            "(\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#]+|(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#]*)?)" +
+                            "(\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:]+|(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:]*)?)" +
                             "|" +
                             "ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/" + 
                             "|" +
@@ -734,7 +770,7 @@ $(function () {
             
             function textToLink(e) {
                 if (
-                    !["body", "code", "pre"].some(
+                    !["body", "code", "pre", "select"].some(
                         (tag) => tag === e.localName
                     ) &&
                     !["www.google"].some((h) => locHost.includes(h))
@@ -748,7 +784,7 @@ $(function () {
                     ) {
                         let child = e.childNodes[i];
                         if (
-                            !["a", "br", "code", "pre", "img", "script"].some(
+                            !["a", "br", "code", "pre", "img", "script", "option"].some(
                                 (tag) => tag === child.localName
                             ) && 
                             child.className !== "textToLink" &&
@@ -810,7 +846,11 @@ $(function () {
                     "jump2.bdimg.com/safecheck/index?url=",
                     "zhouxiaoben.info/wp-content/themes/begin/go.php?url=",
                     "https://to.redircdn.com/?",
-                    "www.423down.com/wp-content/plugins/momgo/go.php?url="
+                    "www.423down.com/wp-content/plugins/momgo/go.php?url=",
+                    "www.423down.com/go.php?url=",
+                    "niao.su/go",
+                    "www.douban.com/link2/?url=",
+                    "51.ruyo.net/go/index.html?u=",
                 ];
                 return keywords.some((k) => a.href.includes(k));
             }
@@ -824,7 +864,6 @@ $(function () {
                 "domains.live.com",
                 "passport.yandex.ru",
                 "www.iconfont.cn",
-                "baike.sogou.com",
                 "www.kdocs.cn",
                 "help.aliyun.com",
                 "cn.bing.com",
@@ -850,39 +889,50 @@ $(function () {
 
             function cleanRedirectLink(a) {
                 // 净化跳转链接
-                let reg = /((?:http|https|\/|\%2F).*?\?|.*?\?.+?=)((?:http|\/|\%2F).+|([\w]+(?:(?:\.|%2E)[\w]+)+))/,
-                    result = reg.exec(a.href);
+                let hosts = ['dalao.ru', 'niao.su', 'iao.su', 'nicelinks.site', 'www.crx4chrome.com'];
+                if ( hosts.some(h => a.search.includes(h)) )  {
+                    t.title(a);
+                    for (let h of hosts) a.href = a.href.replace('utm_source=', '').replace(`?${h}`, '');
+                }
+
+                let reg = /((?:http|https|\/|\%2F).*?\?|.*?\?.+?=)((?:https?:\/\/|www\.|\/|\%2F)[\w_\-\.~\/\=\?&#%\+:]+|(?:\w[\w._-]+\.(?:com|cn|org|net|info|tv|cc|gov|edu))(?:\/[\w_\-\.~\/\=\?&#%\+:]*)?)/,
+                    result = reg.exec(decodeURIComponent(a.href));
                 if (result) {
                     let temp = decodeURIComponent(
                         decodeURIComponent(result[2])
-                    );
+                    ).replace(/https?:\/\//, '');
                     if (
                         !(
-                            decodeURIComponent(location.href).includes(
+                            decodeURIComponent(location.href).replace(/https?:\/\//, '').includes(
                                 temp.split("&")[0]
                             ) ||
-                            (result[3] && result[3].includes(location.host)) ||
                             excludeSites.some((s) => result[1].includes(s)) ||
                             YunDisk.sites[YunDisk.mapHost(a.host)]
                         )
                     ) {
-                        let href = decodeURIComponent(
-                            decodeURIComponent(
-                                result[3]
-                                    ? "http://" + result[3]
-                                    : result[2].startsWith("http")
-                                    ? result[2]
-                                    : location.origin + result[2]
-                            )
-                        );
-                        if (a.title)
-                            a.title += "\n" + decodeURIComponent(a.href);
-                        else a.title = decodeURIComponent(a.href);
-                        if (["c.pc.qq.com","mail.qq.com"].some((h) => a.host == h))
-                            a.href = href.split("&")[0];
-                        else a.href = href;
+                        if (!/t\d+\.html/i.test(temp)) {
+                            let href = decodeURIComponent(
+                                decodeURIComponent(
+                                    result[3]
+                                        ? "http://" + result[3]
+                                        : result[2].startsWith("http")
+                                        ? result[2]
+                                        : location.origin + result[2]
+                                )
+                            );
+
+                            t.title(a);
+                            if (["c.pc.qq.com","mail.qq.com", "m.sogou.com", "www.douban.com", "www.google.com"].some((h) => a.host == h))
+                                a.href = href.split("&")[0];
+                            else a.href = href;
+                        }
                         t.increase();
                     }
+                }
+                
+                if (locHost == "bbs.nga.cn" || locHost == "nga.178.com") {
+                    if (a.host != "bbs.nga.cn" || a.host != "nga.178.com")
+                        a.onclick = null;
                 }
             }
 
@@ -949,7 +999,7 @@ $(function () {
                         result =
                             result ||
                             !/^(?:http|\/\/).+/.test(
-                                a.attributes.href.nodeValue
+                                a.attributes.href && a.attributes.href.nodeValue
                             );
                     if (!result) a.target = "_blank";
                 }
