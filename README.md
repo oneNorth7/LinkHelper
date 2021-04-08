@@ -4,7 +4,7 @@
 
 ## 重大更新
 
-* 全新重构版本，兼容**PC端Firefox、Chrome、Edge**三大主流浏览器，逐一通过各项功能测试（1.5.0以前的版本仅在本人主用的Firefox上测试，建议**删除脚本重装**）；国产浏览器大多基于 [Chromium](https://www.chromium.org/) 开源项目二次开发，理应兼容
+* 全新重构版本，兼容**PC端Firefox、Chrome、Edge**三大主流浏览器，逐一通过各项功能测试；国产浏览器大多基于 [Chromium](https://www.chromium.org/) 开源项目二次开发，理应兼容
 
 ## 主要功能
 
@@ -40,7 +40,7 @@
 
   ![是否跳转到www.crx4chrome.com镜像站](https://gitee.com/oneNorth7/pics/raw/master/picgo/是否跳转到www.crx4chrome.com镜像站.jpg)
 
-  ![404 not found](https://gitee.com/oneNorth7/pics/raw/master/picgo/404 not found.jpg)
+  ![404 not found](https://gitee.com/oneNorth7/pics/raw/master/picgo/404-not-found.jpg)
 
 
 ## 更新历史
