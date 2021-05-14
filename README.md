@@ -5,7 +5,7 @@
 ## 重大更新
 
 * 全新重构版本，兼容**PC端Firefox、Chrome、Edge**三大主流浏览器，逐一通过各项功能测试；国产浏览器大多基于 [Chromium](https://www.chromium.org/) 开源项目二次开发，理应兼容
-* 扩充自动填写密码的网盘支持列表，囊括大部分主流网盘及小众网盘（持续更新中，欢迎反馈新的需要自动填写密码的云盘）
+* 扩充自动填写密码的网盘支持列表，囊括**大部分主流网盘及小众网盘**（持续更新中，欢迎反馈新的需要自动填写密码的云盘）
 
 ## 主要功能
 
@@ -81,7 +81,7 @@
 
 ![网盘自动填写密码](https://gitee.com/oneNorth7/pics/raw/master/picgo/网盘自动填写密码.gif)
 
-![](https://gitee.com/oneNorth7/pics/raw/master/picgo/链接净化直达.gif)
+![链接净化直达](https://gitee.com/oneNorth7/pics/raw/master/picgo/链接净化直达.gif)
 
 ## 参考脚本
 

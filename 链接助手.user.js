@@ -1249,7 +1249,7 @@ $(function () {
                         !(
                             decodeURIComponent(location.href).replace(/https?:\/\//, '').includes(
                                 temp.split("&")[0]
-                            ) ||
+                            ) ||  ['login', 'oauth'].some(k => locHref.include(k)) || a.innerText.includes('登录') ||
                             excludeSites.some((s) => result[1].includes(s)) ||
                             YunDisk.sites[YunDisk.mapHost(a.host)]
                         )
