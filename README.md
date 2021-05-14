@@ -81,7 +81,7 @@
 
 ![网盘自动填写密码](https://gitee.com/oneNorth7/pics/raw/master/picgo/网盘自动填写密码.gif)
 
-![链接净化直达](history/%E9%93%BE%E6%8E%A5%E5%87%80%E5%8C%96%E7%9B%B4%E8%BE%BE.gif)
+![](https://gitee.com/oneNorth7/pics/raw/master/picgo/链接净化直达.gif)
 
 ## 参考脚本
 
