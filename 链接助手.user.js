@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.7.5
+// @version         1.7.6
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -401,7 +401,7 @@ $(function () {
                 // 萌云
                 inputSelector: "#pwd",
                 buttonSelector: "button.MuiButton-root",
-                regStr: "[a-z\\d]{4,6}",
+                regStr: "[a-z\\d]{4,8}",
                 timeout: 500,
                 password: true,
             },
@@ -453,7 +453,7 @@ $(function () {
                 inputSelector: 'input[placeholder="请输入文件密码"]',
                 buttonSelector: "div.btn",
                 regStr: "[a-z\\d]{4}",
-                timeout: 100,
+                timeout: 200,
                 inputEvent: true,
                 store: true,
             },
@@ -461,6 +461,8 @@ $(function () {
             "drive.dnxshare.cn": {}, // 电脑小分享
 
             "my.sharepoint.com": {}, // OneDrive
+
+            "disk.yandex.com": {}, // YandexDisk
 
         },
 
@@ -494,7 +496,8 @@ $(function () {
                 .replace('cncncloud.com', 'moecloud.cn')
                 .replace('ilolita945.softether.net:5212', 'moecloud.cn')
                 .replace('my-file.cn', 'moecloud.cn')
-                .replace('pan.bilnn.com', 'moecloud.cn');
+                .replace('pan.bilnn.com', 'moecloud.cn')
+                .replace('yadi.sk', 'disk.yandex.com');
         },
 
         autoFill(host) {
@@ -870,7 +873,6 @@ $(function () {
                         ) {
                             let selection = getSelection(),
                                 text = selection.toString();
-                            // if (!text.length) alert('请通过选中链接文本转换为链接！');
                             if (url_regexp.test(text))
                                 selectNode =
                                     selection.anchorNode || selection.focusNode;
@@ -879,6 +881,7 @@ $(function () {
                         } else if (['input', 'textarea'].some((tag) => tag === current.localName) && current.className == 'direct-input') {
                             let text = t.clean(current.value, [/[\u4e00-\u9fa5\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]+/g, /^[:：]/, /App.*$/]),
                                 result = url_regexp.exec(text);
+                            t.clog(text);
                             if (result) {
                                 selectNode = document.createTextNode(text);
                                 isInput = true;
@@ -908,7 +911,7 @@ $(function () {
                                 a.onclick = null;
                     }
 
-                    if (locHost == "twitter.com" && a.host == "t.co") a.href = $(a).text();
+                    if (locHost == "twitter.com" && a.host == "t.co") a.href = t.http(a.innerText, true);
 
                     if (locHost == "www.youtube.com" && a.href.includes("www.youtube.com/redirect?")) {
                         if (!a.style.padding) {
@@ -1057,7 +1060,7 @@ $(function () {
 
             let textLength = t.get("textLength", 200);
 
-            // let menuID = t.registerMenu(
+            // t.registerMenu(
             //     `设置文本字数限制(${textLength})`,
             //     limitText
             // );
@@ -1068,6 +1071,7 @@ $(function () {
             //         t.get("textLength", 200)
             //     );
             // }
+
             let url_regexp_g = new RegExp(
                         "\\b(" + url_re_str +
                             "|" +
@@ -1175,6 +1179,7 @@ $(function () {
                     let text = decodeURIComponent(a.innerText).toLowerCase().replace(/^https?:\/\/|\/$/, ''), href = decodeURIComponent(a.href).toLowerCase().replace(/^https?:\/\/|\/$/, '');
                     a.hash = hash;
                     if (password) a.search = search;
+                    t.clog(href, text);
                     return !(text.includes('...') || !text.includes('/') || text == href);
                 }
                 return false;
@@ -1247,9 +1252,9 @@ $(function () {
                     ).replace(/https?:\/\//, '');
                     if (
                         !(
-                            decodeURIComponent(location.href).replace(/https?:\/\//, '').includes(
+                            decodeURIComponent(locHref).replace(/https?:\/\//, '').includes(
                                 temp.split("&")[0]
-                            ) ||  ['login', 'oauth'].some(k => locHref.include(k)) || a.innerText.includes('登录') ||
+                            ) || ['login', 'oauth'].some(k => locHref.include(k)) || a.innerText.includes('登录') ||
                             excludeSites.some((s) => result[1].includes(s)) ||
                             YunDisk.sites[YunDisk.mapHost(a.host)]
                         )
@@ -1347,7 +1352,20 @@ $(function () {
             }
 
             // 添加链接直达输入框
-            (function add_direct() {
+            let addDirectTo = t.get('addDirectTo', true);
+            if (addDirectTo) add_direct();
+            let menuID2 = t.registerMenu(`${addDirectTo ? "[✔]" : "[✖]"}显示链接直达输入框`, directToMenu);
+
+            function directToMenu() {
+                addDirectTo = !addDirectTo;
+                t.set('addDirectTo', addDirectTo);
+                t.unregisterMenu(menuID2);
+                menuID2 = t.registerMenu(`${addDirectTo ? "[✔]" : "[✖]"}显示链接直达输入框`, directToMenu);
+                if (addDirectTo) add_direct();
+                else if ($('#L_DirectTo').length) $('#L_DirectTo').remove();
+            }
+
+            function add_direct() {
                 $('body').append(`<div id="L_DirectTo" class="l-direct-to">
                                     <input type="image" src="data:image/png;base64,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" alt="直达" id="L_DirectButton" class="direct-button" />
                                     <span title="粘贴或输入包含单链接的文本后点击输入框直达链接">
@@ -1365,20 +1383,20 @@ $(function () {
                             #L_DirectButton {
                                 width: 30px;
                                 height: 30px;
-                                vertical-align: middle;
-                                position: relative;
+                                position: absolute;
                                 z-index: 1;
                                 left: -16px;
                             }
                             #L_DirectInput {
                                 width: 300px;
-                                height: 30px;
-                                position: relative;
+                                height: 22px;
+                                position: absolute;
                                 left: -350px;
                                 border: 3px solid #b52bff;
                                 border-radius: 20px;
                                 background-color: #99adf7;
                                 padding-left: 10px;
+                                box-sizing: content-box;
                             }
                             `);
 
@@ -1392,7 +1410,7 @@ $(function () {
                 input.on('paste', () => {
                     setTimeout(() => input[0].click(), 500);
                 });
-
+                // 清空输入框文本内容
                 input.val('');
 
                 button.on('click', () => {
@@ -1402,7 +1420,7 @@ $(function () {
                             button.prop('title', '点击展开输入框');
                         } else {
                             button.addClass('open');
-                            input.focus().animate({ left: '-5px' });
+                            input.focus().animate({ left: '28px' });
                             button.prop('title', '点击收起输入框');
                         }
                     })
@@ -1427,7 +1445,7 @@ $(function () {
                     .on('mouseover', () => {
                         if (timeId) clearTimeout(timeId);
                     });
-            })();
+            }
         }
     }
 });
