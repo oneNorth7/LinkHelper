@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.7.6
+// @version         1.7.7
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -1084,7 +1084,7 @@ $(function () {
 
             function textToLink(e) {
                 if (
-                    !["body", "code", "pre", "select", "main"].some(
+                    !["body", "code", "pre", "select", "main", "input", "textarea"].some(
                         (tag) => tag === e.localName
                     ) &&
                     !["www.google."].some((h) => locHost.includes(h))
@@ -1099,7 +1099,7 @@ $(function () {
                         ) {
                             let child = e.childNodes[i];
                             if (
-                                !["a", "br", "code", "pre", "img", "script", "option"].some(
+                                !["a", "br", "code", "pre", "img", "script", "option", "input", "textarea"].some(
                                     (tag) => tag === child.localName
                                 ) &&
                                 child.className !== "textToLink" &&
