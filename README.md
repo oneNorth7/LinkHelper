@@ -13,8 +13,8 @@
 
    支持网盘列表：
 
-   * [奶牛快传](cowtransfer.com)、[电脑小分享](drive.dnxshare.cn)、[爱盘](down.52pojie.cn)、[云中转](www.yunzhongzhuan.com)、[OneDrive](my.sharepoint.com)、[GoogleDrive](drive.google.com)、[MEGA](mega.nz)、[MediaFire](www.mediafire.com)、[一起写](yiqixie.qingque.cn)、[AndroidDownload](www.androiddownload.net)、[Dropbox](www.dropbox.com)、[库云](www.kufile.net)、[YandexDisk](disk.yandex.com)
-   * 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、部分城通网盘
+   * [奶牛快传](cowtransfer.com)、[电脑小分享](drive.dnxshare.cn)、[爱盘](down.52pojie.cn)、[云中转](www.yunzhongzhuan.com)、[GoogleDrive](drive.google.com)、[MEGA](mega.nz)、[MediaFire](www.mediafire.com)、[一起写](yiqixie.qingque.cn)、[AndroidDownload](www.androiddownload.net)、[Dropbox](www.dropbox.com)、[库云](www.kufile.net)、[YandexDisk](disk.yandex.com)
+   * 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、[OneDrive](https://my.sharepoint.com)、部分城通网盘
 
 2. 跳转页面自动跳转（[微博短链](t.cn)、[书签地球](http://show.bookmarkearth.com/view/784?folderId=45371)、[阳光盒子](https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz)、[开发者知识库](https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==)、[CSDN](https://link.csdn.net/?target=https%3A%2F%2Fgreasyfork.org%2Fzh-CN)、[不死鸟](https://niao.su/go/aHR0cDovL2NyeGRvd24uY29t)、[也许吧](https://www.imaybes.cc/wl?url=zqms0diflZDTp8XZZ5el0Q,,) 等等）
 
@@ -58,10 +58,9 @@
 
 ## 更新历史
 
+* V1.7.8 - 修复替换或净化链接后网盘链接无法添加密码的问题；优化网盘密码搜索和匹配规则；新增OneDrive自动填写密码功能
 * V1.7.7 - 修复输入框和文本框内文本转链接的问题
-
 * V1.7.6 - 修复链接直达文本框定位问题；新增显示链接直达输入框开关
-
 * 新增网盘支持（完整列表请参考主要功能说明）
 * V1.7.5 - 新增链接净化直达文本框；将蓝奏云域名中的lanzous替换为lanzoux
 * V1.7.4 - 新增更新配置数据功能；新增谷歌扩展商店自动切换中文功能
