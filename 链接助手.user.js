@@ -2,7 +2,11 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
+<<<<<<< HEAD
 // @version         1.7.8
+=======
+// @version         1.7.9
+>>>>>>> 5ffd278eacc9d87e230aca5e6ab3a2593320b4dc
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -1009,8 +1013,13 @@ $(function () {
                             }
                         }
                     }
+<<<<<<< HEAD
 
                     let pan = YunDisk.sites[YunDisk.mapHost(a.host)];
+=======
+					
+					let pan = YunDisk.sites[YunDisk.mapHost(a.host)]
+>>>>>>> 5ffd278eacc9d87e230aca5e6ab3a2593320b4dc
                     if (pan) YunDisk.addCode(a);
 
                     if (isTextToLink) {
