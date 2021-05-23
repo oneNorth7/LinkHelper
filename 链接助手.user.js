@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.7.7
+// @version         1.7.8
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -460,7 +460,12 @@ $(function () {
 
             "drive.dnxshare.cn": {}, // 电脑小分享
 
-            "my.sharepoint.com": {}, // OneDrive
+            "my.sharepoint.com": {
+                // OneDrive
+                inputSelector: '#txtPassword',
+                buttonSelector: "#btnSubmitPassword",
+                regStr: "[a-z\\d]{4}",
+            },
 
             "disk.yandex.com": {}, // YandexDisk
 
@@ -476,6 +481,7 @@ $(function () {
             "www.androiddownload.net",
             "www.dropbox.com", // Dropbox
             "www.kufile.net", // 库云
+            "www.kdocs.cn", // 金山文档
         ],
 
         mapHost(host) {
@@ -583,13 +589,13 @@ $(function () {
                 let reg = new RegExp(
                         "\\s*(?:提[取示]|访问|查阅|密\\s*|艾|Extracted-code|key|password|pwd)[码碼]?\\s*[:： （(]?\\s*(" +
                             site.regStr +
-                            ")|^\\s*[:：【\\[ （(]?\\s*(" +
+                            ")|^[码碼]?\\s*[:：【\\[ （(]?\\s*(" +
                             site.regStr +
                             ")[】\\]]?$",
                         "i"
                     ),
                     code = reg.exec($(a).text().trim());
-                for (
+                outloop: for (
                     let i = 10, current = a;
                     current && !code && i > 0;
                     i--, current = current.parentElement
@@ -597,7 +603,13 @@ $(function () {
                     let next = current;
                     while (!code) {
                         next = next.nextSibling;
-                        if (!next || next.href) break;
+                        if (!next) break;
+                        else if ((node => {
+                            if (node.href) return true;
+                            else if (node.innerHTML)
+                                if (/<a.*href=.*/i.test(node.innerHTML))
+                                    return true;
+                            })(next)) break outloop;
                         else code = reg.exec($(next).text().trim());
                     }
                 }
@@ -881,7 +893,6 @@ $(function () {
                         } else if (['input', 'textarea'].some((tag) => tag === current.localName) && current.className == 'direct-input') {
                             let text = t.clean(current.value, [/[\u4e00-\u9fa5\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]+/g, /^[:：]/, /App.*$/]),
                                 result = url_regexp.exec(text);
-                            t.clog(text);
                             if (result) {
                                 selectNode = document.createTextNode(text);
                                 isInput = true;
@@ -901,7 +912,7 @@ $(function () {
                 }
 
                 if (e && e.localName === "a" && e.href) {
-                    let a = e, isPrevent = false, pan = YunDisk.sites[YunDisk.mapHost(a.host)];
+                    let a = e, isPrevent = false;
                     if (locHref.includes("mod.3dmgame.com/mod/"))
                         a.search = "3dmgame.com";
 
@@ -932,7 +943,7 @@ $(function () {
                             a.href = t.http(a.innerText, true);
                             t.increase();
                         }
-                        else if (!isTextToLink && !a.parentElement.className.includes('text2Link') && !a.parentElement.className.includes('textToLink') /*&& !(pan && pan.password)*/ && locHost != 'blog.csdn.net' && isDifferent(a)) {
+                        else if (!isTextToLink && !a.parentElement.className.includes('text2Link') && !a.parentElement.className.includes('textToLink') && locHost != 'blog.csdn.net' && isDifferent(a)) {
                             a.onclick = function() { return false; };
                             isPrevent = true;
                             await t.confirm("是否使用链接文本替换目标链接后打开？",
@@ -999,6 +1010,7 @@ $(function () {
                         }
                     }
 
+                    let pan = YunDisk.sites[YunDisk.mapHost(a.host)];
                     if (pan) YunDisk.addCode(a);
 
                     if (isTextToLink) {
@@ -1179,7 +1191,6 @@ $(function () {
                     let text = decodeURIComponent(a.innerText).toLowerCase().replace(/^https?:\/\/|\/$/, ''), href = decodeURIComponent(a.href).toLowerCase().replace(/^https?:\/\/|\/$/, '');
                     a.hash = hash;
                     if (password) a.search = search;
-                    t.clog(href, text);
                     return !(text.includes('...') || !text.includes('/') || text == href);
                 }
                 return false;
@@ -1201,7 +1212,6 @@ $(function () {
                 "zhannei.baidu.com",
                 "pc.woozooo.com",
                 "play.google.com",
-                "uniportal.huawei.com",
             ];
 
             t.update('excludeSites', excludeSites);
@@ -1254,7 +1264,7 @@ $(function () {
                         !(
                             decodeURIComponent(locHref).replace(/https?:\/\//, '').includes(
                                 temp.split("&")[0]
-                            ) || ['login', 'oauth'].some(k => locHref.include(k)) || a.innerText.includes('登录') ||
+                            ) || ['login', 'oauth'].some(k => locHref.includes(k)) || a.innerText.includes('登录') ||
                             excludeSites.some((s) => result[1].includes(s)) ||
                             YunDisk.sites[YunDisk.mapHost(a.host)]
                         )
