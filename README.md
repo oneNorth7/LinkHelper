@@ -5,21 +5,21 @@
 ## 重大更新
 
 * 全新重构版本，兼容**PC端Firefox、Chrome、Edge**三大主流浏览器，逐一通过各项功能测试；国产浏览器大多基于 [Chromium](https://www.chromium.org/) 开源项目二次开发，理应兼容
-* 扩充自动填写密码的网盘支持列表，囊括**大部分主流网盘及小众网盘**（持续更新中，欢迎反馈新的需要自动填写密码的云盘）
+* 扩充自动填写密码的网盘支持列表，囊括**大部分主流网盘及小众网盘**（持续更新中，**欢迎反馈**新的需要自动填写密码的云盘）
+
+## 虽然移除重定向很方便，但是网络环境复杂，使用前请仔细确认站点可信度和链接安全性！！！
 
 ## 主要功能
 
-1. 点击网盘链接或网盘链接文本（会自动转成链接），**部分网盘**可自动搜索密码，跳转后自动填写密码并提交
+1. 点击网盘链接或网盘链接文本（会自动转成链接），**部分网盘**可自动搜索密码，跳转后自动填写密码并提交，支持网盘列表如下：
 
-   支持网盘列表：
+    * [奶牛快传](https://cowtransfer.com)、[电脑小分享](https://drive.dnxshare.cn)、[爱盘](https://down.52pojie.cn)、[云中转](https://www.yunzhongzhuan.com)、[GoogleDrive](https://drive.google.com)、[MEGA](https://mega.nz)、[MediaFire](https://www.mediafire.com)、[一起写](https://yiqixie.qingque.cn)、[AndroidDownload](https://www.androiddownload.net)、[Dropbox](https://www.dropbox.com)、[库云](https://www.kufile.net)、[YandexDisk](https://disk.yandex.com)、[金山文档](https://www.kdocs.cn)、[比特球云盘](https://pan.bitqiu.com)、[飞猫云](https://www.feimaoyun.com)、[亿方云](https://www.fangcloud.com)、[GD DISK](https://gd.188988.xyz)、[阿里云](https://www.aliyundrive.com)
 
-* [奶牛快传](cowtransfer.com)、[电脑小分享](drive.dnxshare.cn)、[爱盘](down.52pojie.cn)、[云中转](www.yunzhongzhuan.com)、[GoogleDrive](drive.google.com)、[MEGA](mega.nz)、[MediaFire](www.mediafire.com)、[一起写](yiqixie.qingque.cn)、[AndroidDownload](www.androiddownload.net)、[Dropbox](www.dropbox.com)、[库云](www.kufile.net)、[YandexDisk](disk.yandex.com)、[金山文档](www.kdocs.cn)
+    * 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[OneDrive](https://my.sharepoint.com)、[网易邮箱网盘](http://u.163.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[玖麦云](https://bx.qingstore.cn)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、部分城通网盘
 
-* 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、[OneDrive](https://my.sharepoint.com)、部分城通网盘
+2. 跳转页面自动跳转（[微博短链](http://t.cn/A6tkAViV#ujya)、[书签地球](http://show.bookmarkearth.com/view/784?folderId=45371)、[阳光盒子](https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz)、[开发者知识库](https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==)、[CSDN](https://link.csdn.net/?target=https%3A%2F%2Fgreasyfork.org%2Fzh-CN)、[不死鸟](https://niao.su/go/aHR0cDovL2NyeGRvd24uY29t)、[也许吧](https://www.imaybes.cc/wl?url=zqms0diflZDTp8XZZ5el0Q,,)、[天眼查](http://www.tianyancha.com) 等等）
 
-2. 跳转页面自动跳转（[微博短链](t.cn)、[书签地球](http://show.bookmarkearth.com/view/784?folderId=45371)、[阳光盒子](https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz)、[开发者知识库](https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==)、[CSDN](https://link.csdn.net/?target=https%3A%2F%2Fgreasyfork.org%2Fzh-CN)、[不死鸟](https://niao.su/go/aHR0cDovL2NyeGRvd24uY29t)、[也许吧](https://www.imaybes.cc/wl?url=zqms0diflZDTp8XZZ5el0Q,,) 等等）
-
-3. 点击链接文本自动转成链接（支持**http链接、磁力链接、邮箱链接**），默认转换后**不会自动跳转**（**上述支持的网盘链接及自定义域名的链接除外**）
+3. 点击链接文本自动转成链接（支持**http链接、ed2k链接、磁力链接、邮箱链接**），默认转换后**不会自动跳转**（**上述支持的网盘链接、40位哈希码的磁力链接、ed2k开头的电驴链接及自定义域名的链接除外**）
 
 4. 替换跳转链接，点击链接时将**链接文本**替换原跳转链接（链接文本前缀为未收录时会询问是否替换或取消）
 
@@ -33,11 +33,13 @@
 
 9. 链接净化直达输入框（默认显示，可通过菜单项关闭）
 
-## 虽然移除重定向很方便，但是网络环境复杂，使用前请仔细确认站点可信度和链接安全性！！！
+## 如果觉得实用方便，麻烦给个收藏Star或好评！！！
 
 ## 其他说明
 
-* 网盘自动填写密码功能**不支持云查询密码**，也**不记录密码**，只会在个别网盘链接**不支持添加hash或`password`参数**时将密码**临时**存储在脚本的数据页中
+* 网盘自动填写密码功能**不支持云查询密码**，也**不记录密码**，只会在某些网盘链接**不支持添加hash或`password`参数**时将密码**临时**存储在脚本的数据页中
+
+* 搜索网盘密码只能往后搜索，如某个网站的网盘密码固定在网盘链接之前，可反馈作者添加密码预处理，若只是个别帖子由于手误或其他原因导致密码置于网盘链接之前的请勿反馈，请自行手动复制粘贴密码访问
 
 * 博客或论坛帖子中**分开格式化**的链接文本**无法**转换为完整链接；文本长度超过200个字符的文本不会进行文本转链接的处理
 
@@ -58,6 +60,16 @@
 * 使用链接净化直达输入框时，点击图标可**展开/收起**输入框，鼠标离开**5秒**后会自动收起，收起时会清空输入框内容；粘贴的网盘链接**提取码后面不要含过多的无关文本**，否则可能导致无法解析出提取码，文本内的链接数大于1时不会自动跳转，链接间的中文（标点）字符可被过滤掉
 
 ## 更新历史
+
+* V1.8.3 - 修复百度企业网盘和改版天翼云无法自动填写密码的问题；新增阿里云盘支持
+
+* V1.8.2 - 优化链接匹配规则；优化链接文本与链接比较功能
+
+* V1.8.1 - 新增`www.acgjc.com`下载页面预处理功能
+
+* V1.8.0 - 优化链接文本与链接比较功能；优化净化链接功能；新增点击40位特征码文本和ed2k开头的文本转为磁力链接并自动跳转
+
+* V1.7.9 - 新增玖麦云盘、网易邮箱网盘自动填写密码；新增天眼查跳转页面自动跳转；新增比特球云盘、飞猫云、亿方云和GD DISK支持
 
 * V1.7.8 - 修复替换或净化链接后网盘链接无法添加密码的问题；优化网盘密码搜索和匹配规则；新增OneDrive自动填写密码功能
 * V1.7.7 - 修复输入框和文本框内文本转链接的问题
@@ -87,6 +99,8 @@
 
 ![链接净化直达](https://gitee.com/oneNorth7/pics/raw/master/picgo/链接净化直达.gif)
 
+![磁力链接](https://gitee.com/oneNorth7/pics/raw/master/picgo/磁力链接.gif)
+
 ## 参考脚本
 
 * [Open the F**king URL Right Now](https://greasyfork.org/zh-CN/scripts/412612-open-the-f-king-url-right-now)
@@ -94,8 +108,18 @@
 * [Text To link](https://greasyfork.org/zh-CN/scripts/342-text-to-link)
 * [网盘自动填写访问码【威力加强版】](https://greasyfork.org/zh-CN/scripts/29762-%E7%BD%91%E7%9B%98%E8%87%AA%E5%8A%A8%E5%A1%AB%E5%86%99%E8%AE%BF%E9%97%AE%E7%A0%81-%E5%A8%81%E5%8A%9B%E5%8A%A0%E5%BC%BA%E7%89%88)
 
-## 个人公众号
+## 关注赞赏
 
-**敬请关注**一波个人公众号，**第一时间**获取更新推送！！！
+**关注我，不迷路**~~ 第一时间获取更新推送！！！
 
-![一个北七](https://gitee.com/oneNorth7/pics/raw/master/picgo/oneNorth7.png)
+<img src="https://gitee.com/oneNorth7/pics/raw/master/picgo/oneNorth7.png" width=500 />
+
+**原创不易，您的支持是我坚持创作的动力**~~
+
+1. 可以通过[爱发电-一个北七](https://afdian.net/@oneNorth7)赞助，也可以直接扫一扫微信赞赏码哦～
+
+<img src="https://gitee.com/oneNorth7/pics/raw/master/picgo/reward_qrcode.png" width=400 />
+
+2. 或者用支付宝扫一扫红包码或打开支付宝首页搜 `702089817` 领红包支持一下，免费让作者赚个支付宝赏金
+
+<img src="https://gitee.com/oneNorth7/pics/raw/master/picgo/红包码.jpg" width=400 />
