@@ -6,6 +6,7 @@
 
 * 全新重构版本，兼容**PC端Firefox、Chrome、Edge**三大主流浏览器，逐一通过各项功能测试；国产浏览器大多基于 [Chromium](https://www.chromium.org/) 开源项目二次开发，理应兼容
 * 扩充自动填写密码的网盘支持列表，囊括**大部分主流网盘及小众网盘**（持续更新中，**欢迎反馈**新的需要自动填写密码的云盘）
+* **目前唯一支持阿里云网盘自动填写密码的脚本**（官方验证机制比较繁琐，自行调试研究在Firefox下实现突破，后又多次钻研终于解决Chrome浏览器兼容问题，炫耀一下耶）
 
 ## 虽然移除重定向很方便，但是网络环境复杂，使用前请仔细确认站点可信度和链接安全性！！！
 
@@ -13,27 +14,27 @@
 
 1. 点击网盘链接或网盘链接文本（会自动转成链接），**部分网盘**可自动搜索密码，跳转后自动填写密码并提交，支持网盘列表如下：
 
-    * [奶牛快传](https://cowtransfer.com)、[电脑小分享](https://drive.dnxshare.cn)、[爱盘](https://down.52pojie.cn)、[云中转](https://www.yunzhongzhuan.com)、[GoogleDrive](https://drive.google.com)、[MEGA](https://mega.nz)、[MediaFire](https://www.mediafire.com)、[一起写](https://yiqixie.qingque.cn)、[AndroidDownload](https://www.androiddownload.net)、[Dropbox](https://www.dropbox.com)、[库云](https://www.kufile.net)、[YandexDisk](https://disk.yandex.com)、[金山文档](https://www.kdocs.cn)、[比特球云盘](https://pan.bitqiu.com)、[飞猫云](https://www.feimaoyun.com)、[亿方云](https://www.fangcloud.com)、[GD DISK](https://gd.188988.xyz)、[阿里云](https://www.aliyundrive.com)
+    * [奶牛快传](https://cowtransfer.com)、[电脑小分享](https://drive.dnxshare.cn)、[爱盘](https://down.52pojie.cn)、[云中转](https://www.yunzhongzhuan.com)、[GoogleDrive](https://drive.google.com)、[MEGA](https://mega.nz)、[MediaFire](https://www.mediafire.com)、[一起写](https://yiqixie.qingque.cn)、[AndroidDownload](https://www.androiddownload.net)、[Dropbox](https://www.dropbox.com)、[库云](https://www.kufile.net)、[YandexDisk](https://disk.yandex.com)、[金山文档](https://www.kdocs.cn)、[比特球云盘](https://pan.bitqiu.com)、[飞猫云](https://www.feimaoyun.com)、[亿方云](https://www.fangcloud.com)、[GD DISK](https://gd.188988.xyz)、[UC网盘](https://www.yun.cn)、[语雀](https://www.yuque.com)、[石墨](https://shimo.im)
 
-    * 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[OneDrive](https://my.sharepoint.com)、[网易邮箱网盘](http://u.163.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[玖麦云](https://bx.qingstore.cn)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、部分城通网盘
+    * 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[百度云文档](https://pan.baidu.com/doc)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[OneDrive](https://my.sharepoint.com)、[网易邮箱网盘](http://u.163.com)、[阿里云盘](https://www.aliyundrive.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[玖麦云](https://bx.qingstore.cn)、[MBA网盘](https://pan.mba)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、部分城通网盘
 
-2. 跳转页面自动跳转（[微博短链](http://t.cn/A6tkAViV#ujya)、[书签地球](http://show.bookmarkearth.com/view/784?folderId=45371)、[阳光盒子](https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz)、[开发者知识库](https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==)、[CSDN](https://link.csdn.net/?target=https%3A%2F%2Fgreasyfork.org%2Fzh-CN)、[不死鸟](https://niao.su/go/aHR0cDovL2NyeGRvd24uY29t)、[也许吧](https://www.imaybes.cc/wl?url=zqms0diflZDTp8XZZ5el0Q,,)、[天眼查](http://www.tianyancha.com) 等等）
+2. 跳转页面自动跳转（[微博短链](http://t.cn/A6tkAViV#ujya)、[书签地球](http://show.bookmarkearth.com/view/784?folderId=45371)、[阳光盒子](https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz)、[开发者知识库](https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==)、[CSDN](https://link.csdn.net/?target=https%3A%2F%2Fgreasyfork.org%2Fzh-CN)、[不死鸟](https://niao.su/go/aHR0cDovL2NyeGRvd24uY29t)、[也许吧](https://www.imaybes.cc/wl?url=zqms0diflZDTp8XZZ5el0Q,,)、[天眼查](http://www.tianyancha.com)、[语雀](https://www.yuque.com/r/goto?url=https%3A%2F%2Fgitee.com)、[百度贴吧](http://jump2.bdimg.com/safecheck/index?url=) 等等）
 
-3. 点击链接文本自动转成链接（支持**http链接、ed2k链接、磁力链接、邮箱链接**），默认转换后**不会自动跳转**（**上述支持的网盘链接、40位哈希码的磁力链接、ed2k开头的电驴链接及自定义域名的链接除外**）
+3. 点击链接文本自动转成链接（支持**http链接、磁力链接、电驴链接、迅雷链接、邮箱链接**），默认转换后**不会自动跳转**（**上述支持的网盘或文档链接、40位哈希码的磁力链接、ed2k开头的电驴链接、thunder开头的迅雷链接及自定义域名的链接除外**）
 
 4. 替换跳转链接，点击链接时将**链接文本**替换原跳转链接（链接文本前缀为未收录时会询问是否替换或取消）
 
 5. 净化跳转链接，点击链接时移除域名后缀（部分站点支持），将链接中的**真实链接**替换原跳转链接（可添加例外）
 
-6. 维基百科及镜像、Mozilla开发者、MicroSoft开发者、谷歌商店自动切换中文（可控）；点击维基百科、谷歌开发者链接自动转换为镜像链接并跳转，点击谷歌扩展商店链接时询问是否切换为镜像链接（默认开启，身处国外或自备梯子的用户可自行关闭）
+6. 维基百科及镜像、Mozilla开发者、MicroSoft开发者、谷歌商店自动切换中文（可控）；点击维基百科、谷歌开发者链接会自动转换为镜像链接并跳转，点击谷歌扩展商店链接时询问是否切换为镜像链接（默认开启，身处国外或自备梯子的用户可自行关闭）
 
-7. 新标签打开链接（默认关闭，可控，可添加站点白名单）
+7. 新标签打开链接（默认关闭，可控，可添加站点白名单），磁力链接、电驴链接和迅雷链接移除新标签打开
 
 8. 自定义添加链接文本转链接后自动跳转域名
 
 9. 链接净化直达输入框（默认显示，可通过菜单项关闭）
 
-## 如果觉得实用方便，麻烦给个收藏Star或好评！！！
+## 如果觉得实用方便，麻烦收藏本脚本或关注作者！！！
 
 ## 其他说明
 
@@ -53,45 +54,24 @@
 
 * Chrome系浏览器中点击谷歌应用商店链接会弹出询问`是否跳转镜像站`的确认或取消的提示，跳转后如果出现`404`说明该镜像站可能没有对应的扩展，可返回尝试输入扩展名称进行搜索
 
-  ![是否跳转到www.crx4chrome.com镜像站_new](https://gitee.com/oneNorth7/pics/raw/master/picgo/是否跳转到www.crx4chrome.com镜像站_new.jpg)
-  
+* **请不要在镜像网站登录账号，若因此造成任何损失本人概不负责**
+
+* ![是否跳转到www.crx4chrome.com镜像站_new](https://gitee.com/oneNorth7/pics/raw/master/picgo/是否跳转到www.crx4chrome.com镜像站_new.jpg)
+
   ![404 not found](https://gitee.com/oneNorth7/pics/raw/master/picgo/404-not-found.jpg)
   
 * 使用链接净化直达输入框时，点击图标可**展开/收起**输入框，鼠标离开**5秒**后会自动收起，收起时会清空输入框内容；粘贴的网盘链接**提取码后面不要含过多的无关文本**，否则可能导致无法解析出提取码，文本内的链接数大于1时不会自动跳转，链接间的中文（标点）字符可被过滤掉
 
-## 更新历史
+* 目前网上带密码的阿里云盘分享链接实在太少了，本人找到的是仅有7天有效期的，还有自动生成的加密分享文本中的密码似乎在链接前面，所以如果遇到**站外分享**的阿里云盘链接不能自动添加密码的情况，请反馈相关地址给作者进行测试和修复
 
-* V1.8.3 - 修复百度企业网盘和改版天翼云无法自动填写密码的问题；新增阿里云盘支持
+## 更新信息
 
-* V1.8.2 - 优化链接匹配规则；优化链接文本与链接比较功能
-
-* V1.8.1 - 新增`www.acgjc.com`下载页面预处理功能
-
-* V1.8.0 - 优化链接文本与链接比较功能；优化净化链接功能；新增点击40位特征码文本和ed2k开头的文本转为磁力链接并自动跳转
-
-* V1.7.9 - 新增玖麦云盘、网易邮箱网盘自动填写密码；新增天眼查跳转页面自动跳转；新增比特球云盘、飞猫云、亿方云和GD DISK支持
-
-* V1.7.8 - 修复替换或净化链接后网盘链接无法添加密码的问题；优化网盘密码搜索和匹配规则；新增OneDrive自动填写密码功能
-* V1.7.7 - 修复输入框和文本框内文本转链接的问题
-* V1.7.6 - 修复链接直达文本框定位问题；新增显示链接直达输入框开关
-* 新增网盘支持（完整列表请参考主要功能说明）
-* V1.7.5 - 新增链接净化直达文本框；将蓝奏云域名中的lanzous替换为lanzoux
-* V1.7.4 - 新增更新配置数据功能；新增谷歌扩展商店自动切换中文功能
-* V1.7.3 - 优化链接文本与链接比较的判断逻辑；优化password添加密码方式；新增自定义添加链接文本转链接后自动跳转域名功能；新增自动切换镜像开关和域名判断
-* V1.7.2 - 优化链接正则匹配规则；修复净化链接后缀功能的判断问题
-* V1.7.1 - 优化链接净化功能的匹配规则；新增移除Youtube、Twitter、Facebook链接重定向功能
-* V1.7.0 - 优化115云盘自动填写密码功能；优化链接净化功能
-* V1.6.9 - 优化净化链接域名后缀功能
-* V1.6.8 - 调整链接文本替换链接功能和链接净化功能顺序
-* V1.6.7 - 优化链接文本与链接比较规则
-* V1.6.6 - 优化净化链接域名后缀参数功能
-* V1.6.5 - `password`添加密码方式保留原有参数
-* V1.6.4 - 优化链接净化功能的匹配规则；新增http链接域名后缀(nz, me)；优化链接文本与链接比较规则
-* V1.6.3 - 新增`password`添加密码方式；新增链接替换或净化标识
-* V1.6.2 - 优化链接文本替换链接和谷歌应用商店链接转镜像站的提示功能；优化链接文本转链接功能；优化Mozilla开发者自动切换中文功能
-* V.16.1 - 优化链接文本替换目标链接功能
-* V1.6.0 - 新增`gopojie`下载页面预处理功能；优化净化链接的正则匹配规则
-* V1.5.1 ~ V1.5.9 - 移除NGA玩家社区外链访问提醒；优化和彩云自动填写密码功能；优化净化跳转链接功能；新增Chrome系浏览器中谷歌应用商店链接转镜像站`www.crx4chrome.com`功能
+* V1.8.8 - 新增百度贴吧跳转页面自动跳转；优化阿里云盘自动填写密码功能，解决浏览器兼容问题；优化网盘密码搜索规则（针对阿里云盘，往前搜索密码）
+* V1.8.7 - 新增UC网盘、语雀、石墨支持；百度云手机端链接自动转为电脑端链接；新增`thunder://`协议文本转链接并自动跳转；磁力链接、电驴链接和迅雷链接移除新标签打开
+* V1.8.6 - 新增阿里云盘自动填写密码功能；优化链接匹配规则
+* V1.8.5 - 优化链接文本与链接比较功能；新增语雀跳转页面自动跳转, 移除文中链接重定向；新增百度云文档自动填写密码
+* V1.8.4 - 优化网盘密码搜索功能；修复净化磁力链接tracker的问题；优化谷歌商店自动切换中文功能
+* 更早的更新历史信息请查看`update_history.md`
 
 ## 功能演示
 
@@ -100,6 +80,8 @@
 ![链接净化直达](https://gitee.com/oneNorth7/pics/raw/master/picgo/链接净化直达.gif)
 
 ![磁力链接](https://gitee.com/oneNorth7/pics/raw/master/picgo/磁力链接.gif)
+
+![阿里云盘自动填写密码](https://gitee.com/oneNorth7/pics/raw/master/picgo/阿里云盘自动填写密码.gif)
 
 ## 参考脚本
 
