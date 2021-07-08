@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.8.8
+// @version         1.8.9
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -255,6 +255,31 @@ $(function () {
             }
         },
         
+        "www.qiuziyuan.net": function () {
+            if (
+                /https:\/\/www\.qiuziyuan\.net\/(?:pcrj\/|Android\/\d+\.html)/.test(
+                    locHref
+                )
+            ) {
+                let filetit = $("div.filetit:first");
+                for (let child of filetit.children()) {
+                    if (child.href) {
+                        let result = url_regexp.exec(child.innerHTML);
+                        if (result) child.href = t.http(result[1]);
+                    }
+
+                    if (
+                        child.innerHTML.startsWith("90网盘：") ||
+                        child.innerHTML.includes("90pan")
+                    ) {
+                        let dom = filetit.next().next(),
+                            result = /(?:90网盘：|\/\s*)(\d+)/.exec(dom.html());
+                        if (result) child.href += "#" + result[1];
+                    }
+                }
+            }
+        },
+        
         "www.gopojie.net": function () {
             if (/https:\/\/www\.gopojie\.net\/download\?post_id=/.test(locHref)) {
                 setTimeout(() => {
@@ -272,6 +297,24 @@ $(function () {
                         link = codeNode.parents('div.fieldset-content').find('a');
                     if (link) link.prop('href', link[0].href + '#' + code);
                 }
+            }
+        },
+        
+        "www.bsh.me": function () {
+            if (/https:\/\/www\.bsh\.me\/download\.php\?author=/.test(locHref)) {
+                $('ul.list-group:last').find('a').each((i, a) => {
+                    let text = $(a).text(),
+                        codeNode = $(a).parents('ul.list-group').find(`span.item-title:contains("${text}"):last`),
+                        result = /\w{2,10}/.exec(codeNode.text());
+
+                    if (a.search === "?%3E") a.search = "";
+                    
+                    if (result) a.hash = result[0];
+                    else a.hash = codeNode.parent().text().match("\\w{2,10}")[0];
+                });
+                
+                $(".card div.text-center, footer.blockquote-footer").hide();
+                $("div.card-signup").css("margin-bottom", "20px");
             }
         },
     };
@@ -592,7 +635,8 @@ $(function () {
                                     }, 1000);
                                 } else if (site.multiEvent) {
                                     input.attr("value", code);
-                                    if (!localStorage.getItem('shareToken')) {
+                                    let token = localStorage.getItem('shareToken');
+                                    if (!token || new Date > new Date(JSON.parse(token).expire_time)) {
                                         let data = JSON.stringify({share_id: location.pathname.replace('/s/', ''), share_pwd: code});
                                         $.ajax("https://api.aliyundrive.com/v2/share_link/get_share_token",
                                                {

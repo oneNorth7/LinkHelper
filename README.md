@@ -14,7 +14,7 @@
 
 1. 点击网盘链接或网盘链接文本（会自动转成链接），**部分网盘**可自动搜索密码，跳转后自动填写密码并提交，支持网盘列表如下：
 
-    * [奶牛快传](https://cowtransfer.com)、[电脑小分享](https://drive.dnxshare.cn)、[爱盘](https://down.52pojie.cn)、[云中转](https://www.yunzhongzhuan.com)、[GoogleDrive](https://drive.google.com)、[MEGA](https://mega.nz)、[MediaFire](https://www.mediafire.com)、[一起写](https://yiqixie.qingque.cn)、[AndroidDownload](https://www.androiddownload.net)、[Dropbox](https://www.dropbox.com)、[库云](https://www.kufile.net)、[YandexDisk](https://disk.yandex.com)、[金山文档](https://www.kdocs.cn)、[比特球云盘](https://pan.bitqiu.com)、[飞猫云](https://www.feimaoyun.com)、[亿方云](https://www.fangcloud.com)、[GD DISK](https://gd.188988.xyz)、[UC网盘](https://www.yun.cn)、[语雀](https://www.yuque.com)、[石墨](https://shimo.im)
+    * [奶牛快传](https://cowtransfer.com)、[电脑小分享](https://drive.dnxshare.cn)、[爱盘](https://down.52pojie.cn)、[云中转](https://www.yunzhongzhuan.com)、[GoogleDrive](https://drive.google.com)、[MEGA](https://mega.nz)、[MediaFire](https://www.mediafire.com)、[一起写](https://yiqixie.qingque.cn)、[AndroidDownload](https://www.androiddownload.net)、[Dropbox](https://www.dropbox.com)、[库云](https://www.kufile.net)、[YandexDisk](https://disk.yandex.com)、[金山文档](https://www.kdocs.cn)、[比特球云盘](https://pan.bitqiu.com)、[飞猫云](https://www.feimaoyun.com)、[亿方云](https://www.fangcloud.com)、[GD DISK](https://gd.188988.xyz)、[UC网盘](https://www.yun.cn)、[语雀](https://www.yuque.com)、[石墨文档](https://shimo.im)
 
     * 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[百度云文档](https://pan.baidu.com/doc)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[OneDrive](https://my.sharepoint.com)、[网易邮箱网盘](http://u.163.com)、[阿里云盘](https://www.aliyundrive.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[玖麦云](https://bx.qingstore.cn)、[MBA网盘](https://pan.mba)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、部分城通网盘
 
@@ -54,18 +54,19 @@
 
 * Chrome系浏览器中点击谷歌应用商店链接会弹出询问`是否跳转镜像站`的确认或取消的提示，跳转后如果出现`404`说明该镜像站可能没有对应的扩展，可返回尝试输入扩展名称进行搜索
 
-* **请不要在镜像网站登录账号，若因此造成任何损失本人概不负责**
-
 * ![是否跳转到www.crx4chrome.com镜像站_new](https://gitee.com/oneNorth7/pics/raw/master/picgo/是否跳转到www.crx4chrome.com镜像站_new.jpg)
 
   ![404 not found](https://gitee.com/oneNorth7/pics/raw/master/picgo/404-not-found.jpg)
   
+* **请不要在镜像网站登录账号，若因此造成任何损失本人概不负责**
+
 * 使用链接净化直达输入框时，点击图标可**展开/收起**输入框，鼠标离开**5秒**后会自动收起，收起时会清空输入框内容；粘贴的网盘链接**提取码后面不要含过多的无关文本**，否则可能导致无法解析出提取码，文本内的链接数大于1时不会自动跳转，链接间的中文（标点）字符可被过滤掉
 
 * 目前网上带密码的阿里云盘分享链接实在太少了，本人找到的是仅有7天有效期的，还有自动生成的加密分享文本中的密码似乎在链接前面，所以如果遇到**站外分享**的阿里云盘链接不能自动添加密码的情况，请反馈相关地址给作者进行测试和修复
 
 ## 更新信息
 
+* V1.8.9 - 优化阿里云盘自动填写密码功能；新增蓝鲨下载页面网盘密码预处理功能
 * V1.8.8 - 新增百度贴吧跳转页面自动跳转；优化阿里云盘自动填写密码功能，解决浏览器兼容问题；优化网盘密码搜索规则（针对阿里云盘，往前搜索密码）
 * V1.8.7 - 新增UC网盘、语雀、石墨支持；百度云手机端链接自动转为电脑端链接；新增`thunder://`协议文本转链接并自动跳转；磁力链接、电驴链接和迅雷链接移除新标签打开
 * V1.8.6 - 新增阿里云盘自动填写密码功能；优化链接匹配规则
