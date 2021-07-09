@@ -26,7 +26,7 @@
 
 5. 净化跳转链接，点击链接时移除域名后缀（部分站点支持），将链接中的**真实链接**替换原跳转链接（可添加例外）
 
-6. 维基百科及镜像、Mozilla开发者、MicroSoft开发者、谷歌商店自动切换中文（可控）；点击维基百科、谷歌开发者链接会自动转换为镜像链接并跳转，点击谷歌扩展商店链接时询问是否切换为镜像链接（默认开启，身处国外或自备梯子的用户可自行关闭）
+6. 维基百科及镜像、Mozilla开发者、MicroSoft开发者、谷歌商店自动切换中文（可控）；点击维基百科、谷歌开发者链接会自动转换为镜像链接并跳转，点击谷歌扩展商店或Github链接时询问是否切换为镜像链接（默认开启，身处国外或自备梯子的用户可自行关闭）
 
 7. 新标签打开链接（默认关闭，可控，可添加站点白名单），磁力链接、电驴链接和迅雷链接移除新标签打开
 
@@ -53,18 +53,21 @@
 * **由于Firefox和Chrome鼠标事件对象的差异，Firefox可以精准获取点击的文本节点，而Chrome做不到，故文本转链接功能在这两款浏览器上的功能表现会有所不同**
 
 * Chrome系浏览器中点击谷歌应用商店链接会弹出询问`是否跳转镜像站`的确认或取消的提示，跳转后如果出现`404`说明该镜像站可能没有对应的扩展，可返回尝试输入扩展名称进行搜索
+![是否跳转到www.crx4chrome.com镜像站_new](https://gitee.com/oneNorth7/pics/raw/master/picgo/是否跳转到www.crx4chrome.com镜像站_new.jpg)
 
-* ![是否跳转到www.crx4chrome.com镜像站_new](https://gitee.com/oneNorth7/pics/raw/master/picgo/是否跳转到www.crx4chrome.com镜像站_new.jpg)
-
-  ![404 not found](https://gitee.com/oneNorth7/pics/raw/master/picgo/404-not-found.jpg)
-  
-* **请不要在镜像网站登录账号，若因此造成任何损失本人概不负责**
+![404 not found](https://gitee.com/oneNorth7/pics/raw/master/picgo/404-not-found.jpg)
 
 * 使用链接净化直达输入框时，点击图标可**展开/收起**输入框，鼠标离开**5秒**后会自动收起，收起时会清空输入框内容；粘贴的网盘链接**提取码后面不要含过多的无关文本**，否则可能导致无法解析出提取码，文本内的链接数大于1时不会自动跳转，链接间的中文（标点）字符可被过滤掉
 
 * 目前网上带密码的阿里云盘分享链接实在太少了，本人找到的是仅有7天有效期的，还有自动生成的加密分享文本中的密码似乎在链接前面，所以如果遇到**站外分享**的阿里云盘链接不能自动添加密码的情况，请反馈相关地址给作者进行测试和修复
 
+* 点击Github链接会询问是否跳转到`fastgit`镜像站，该功能**仅为加速访问并浏览项目**，跳转后右下角会有相关提示，镜像站上方的主页图标和登录和注册按钮会被移除，**请不要在镜像网站登录账号，若因此造成任何损失本人概不负责**；请勿频繁访问镜像站，否则可能会触发`滥用检测机制`，需要等几分钟才能再度访问
+
+  ![触发滥用检测机制](https://gitee.com/oneNorth7/pics/raw/master/picgo/触发滥用检测机制.jpg)
+
 ## 更新信息
+
+* V1.9.0 - 优化阿里云盘自动填写密码功能；新增点击Github链接询问是否转`fastgit`镜像链接功能
 
 * V1.8.9 - 优化阿里云盘自动填写密码功能；新增蓝鲨下载页面网盘密码预处理功能
 * V1.8.8 - 新增百度贴吧跳转页面自动跳转；优化阿里云盘自动填写密码功能，解决浏览器兼容问题；优化网盘密码搜索规则（针对阿里云盘，往前搜索密码）
@@ -84,12 +87,15 @@
 
 ![阿里云盘自动填写密码](https://gitee.com/oneNorth7/pics/raw/master/picgo/阿里云盘自动填写密码.gif)
 
+![Github转fastgit镜像](https://gitee.com/oneNorth7/pics/raw/master/picgo/Github转fastgit镜像.gif)
+
 ## 参考脚本
 
 * [Open the F**king URL Right Now](https://greasyfork.org/zh-CN/scripts/412612-open-the-f-king-url-right-now)
 * [知乎真实链接地址重定向](https://greasyfork.org/zh-CN/scripts/20431-zhihu-link-redirect-fix)
 * [Text To link](https://greasyfork.org/zh-CN/scripts/342-text-to-link)
 * [网盘自动填写访问码【威力加强版】](https://greasyfork.org/zh-CN/scripts/29762-%E7%BD%91%E7%9B%98%E8%87%AA%E5%8A%A8%E5%A1%AB%E5%86%99%E8%AE%BF%E9%97%AE%E7%A0%81-%E5%A8%81%E5%8A%9B%E5%8A%A0%E5%BC%BA%E7%89%88)
+* [FastGithub 镜像加速访问、克隆和下载](https://greasyfork.org/zh-CN/scripts/397419-fastgithub-%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E8%AE%BF%E9%97%AE-%E5%85%8B%E9%9A%86%E5%92%8C%E4%B8%8B%E8%BD%BD)
 
 ## 关注赞赏
 

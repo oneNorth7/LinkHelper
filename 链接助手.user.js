@@ -2,10 +2,10 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.8.9
+// @version         1.9.0
 // @author          一个北七
 // @run-at          document-body
-// @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
+// @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
 // @icon            https://gitee.com/oneNorth7/pics/raw/master/picgo/link-helper.png
 // @compatible      chrome 69+
 // @compatible      firefox 78+
@@ -352,6 +352,7 @@ $(function () {
                 inputSelector: "input.access-code-input",
                 buttonSelector: "div.button",
                 regStr: "[a-z\\d]{4}",
+                timeout: 100,
                 password: true,
                 inputEvent: true,
             },
@@ -635,15 +636,14 @@ $(function () {
                                     }, 1000);
                                 } else if (site.multiEvent) {
                                     input.attr("value", code);
-                                    let token = localStorage.getItem('shareToken');
-                                    if (!token || new Date > new Date(JSON.parse(token).expire_time)) {
-                                        let data = JSON.stringify({share_id: location.pathname.replace('/s/', ''), share_pwd: code});
-                                        $.ajax("https://api.aliyundrive.com/v2/share_link/get_share_token",
-                                               {
-                                                    type: "POST", data,
-                                                    success: res => localStorage.setItem('shareToken', JSON.stringify(res))
-                                               }).then(() => location.reload());
-                                    }
+                                    button.attr("data-is-disabled", false);
+                                    
+									let data = JSON.stringify({share_id: location.pathname.replace('/s/', ''), share_pwd: code});
+									$.ajax("https://api.aliyundrive.com/v2/share_link/get_share_token",
+										   {
+												type: "POST", data,
+												success: res => localStorage.setItem('shareToken', JSON.stringify(res))
+										   }).then(() => location.reload());
                                 } else if (site.react) {
                                     let lastValue = input.val();
                                     input.val(code);
@@ -1003,6 +1003,12 @@ $(function () {
                 }, 3000);
             }
             
+            if (locHost === "hub.fastgit.org") {
+                $('div.position-relative.mr-3, div.position-relative.mr-3+a, div.d-flex.flex-items-center>a').remove();
+                if (location.pathname === "/")
+                    $("form div.d-flex, div.home-nav-hidden>a").remove();
+            }
+            
             async function listener(obj) {
                 let e = obj.originalEvent.explicitOriginalTarget || obj.originalEvent.target,
                     isTextToLink = false, isInput = false;
@@ -1125,6 +1131,28 @@ $(function () {
                                     "developers.google.com",
                                     "developers.google.cn"
                                 );
+                        } else if (locHost !== "github.com" && a.host === "github.com") {
+                            // Github
+                            a.onclick = function() { return false; };
+                                isPrevent = true;
+                                await t.confirm('是否跳转到【fastgit】镜像站？',
+                                                () => {
+                                                    // 是
+                                                    //a.host = a.host.replace("github.com", "github.com.cnpmjs.org");
+                                                     a.host = a.host.replace("github.com", "hub.fastgit.org");
+                                                    // a.host = a.host.replace("github.com", "github.rc1844.workers.dev");
+                                                    t.title(a, "已替换为fastgit镜像链接，请不要登录帐号！！！");
+                                                    setTimeout(() => t.showNotice('镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！'), 1000);
+                                                },
+                                                () => {
+                                                    // 否
+                                                },
+                                                () => {
+                                                    // 取消
+                                                    isPrevent = false;
+                                                    a.onclick = null;
+
+                                });
                         } else if (a.host.includes("chrome.google.com")) {
                             // 谷歌应用商店
                             if (isChromium) {
