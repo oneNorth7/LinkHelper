@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.0
+// @version         1.9.1
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -130,7 +130,6 @@ $(function () {
                         cancelButtonText: '否',
                         showDenyButton: deny,
                         denyButtonText: '取消',
-                        // customClass
                     };
             return Swal.fire(option).then((res) => {
                 if (res.isConfirmed) yes();
@@ -315,6 +314,16 @@ $(function () {
                 
                 $(".card div.text-center, footer.blockquote-footer").hide();
                 $("div.card-signup").css("margin-bottom", "20px");
+            }
+        },
+        
+        "www.zhiruanku.com": function () {
+            if (/https:\/\/www\.zhiruanku\.com\/\d+/.test(locHref)) {
+                $("div.wp-block-zibllblock-buttons a").each((i, a) => {
+                    a.href = a.dataset.id
+                    let result = a.textContent.match(":(\\w{2,10})");
+                    if (result) a.hash = result[1];
+                });
             }
         },
     };
@@ -558,6 +567,7 @@ $(function () {
                 .replace(/.*lanzou[isx]?.com/, 'lanzou.com')
                 .replace(/^(?:[a-z]\d{3}|\d{3}[a-z])\.com$/, 'ct.ghpym.com')
                 .replace('dl.sixyin.com', 'ct.ghpym.com')
+                .replace('ct.bsh.me', 'ct.ghpym.com')
                 .replace(/quqi\.\w+\.com/, 'quqi.com')
                 .replace('feixin.10086.cn', '139.com')
                 .replace('ws28.cn', 'www.wenshushu.cn')
@@ -637,13 +647,12 @@ $(function () {
                                 } else if (site.multiEvent) {
                                     input.attr("value", code);
                                     button.attr("data-is-disabled", false);
-                                    
-									let data = JSON.stringify({share_id: location.pathname.replace('/s/', ''), share_pwd: code});
-									$.ajax("https://api.aliyundrive.com/v2/share_link/get_share_token",
-										   {
-												type: "POST", data,
-												success: res => localStorage.setItem('shareToken', JSON.stringify(res))
-										   }).then(() => location.reload());
+                                        let data = JSON.stringify({share_id: location.pathname.replace('/s/', ''), share_pwd: code});
+                                        $.ajax("https://api.aliyundrive.com/v2/share_link/get_share_token",
+                                               {
+                                                    type: "POST", data,
+                                                    success: res => localStorage.setItem('shareToken', JSON.stringify(res))
+                                               }).then(() => location.reload());
                                 } else if (site.react) {
                                     let lastValue = input.val();
                                     input.val(code);
@@ -743,7 +752,7 @@ $(function () {
                 "show.bookmarkearth.com": {
                     // 书签地球
                     include: "http://show.bookmarkearth.com/view/",
-                    selector: "a.open-in-new-window",
+                    selector: "a.open-in-new-window, div.actions>a",
                 },
 
                 "t.cn": {
@@ -778,21 +787,9 @@ $(function () {
                     timeout: 100,
                 },
                 
-                "niao.su": {
-                    // 不死鸟
-                    include: "https://niao.su/go/",
-                    selector: "a.c-footer-a1",
-                },
-                
                 "support.qq.com": {
                     include: "support.qq.com/products/",
                     selector: "span.link_url",
-                },
-                
-                "www.imaybes.cc": {
-                    // 也许吧
-                    include: "www.imaybes.cc/wl?url=",
-                    selector: "a.button",
                 },
                 
                 "www.tianyancha.com": {
@@ -830,6 +827,8 @@ $(function () {
                     function redirect() {
                         let target = $(site.selector);
                         if (target.length) location.replace(target[0].href || target[0].innerText);
+                        else if (locHost == "t.cn" && $("div.text:contains('绿色上网')").length)
+                            fetch(locHref).then(res => location.replace(res.headers.get("location")));
                         else t.clog('找不到跳转目标！');
                         t.increase();
                     }
@@ -864,7 +863,7 @@ $(function () {
                         history.pushState(null, null, locHref);
                         if (a.length) location.replace(a[0].href);
                         else t.showNotice("没有找到中文页面!");
-                    }
+                    }// else history.back();
                 }
             },
 
@@ -973,23 +972,23 @@ $(function () {
         
         if (locHost.match(/.+wiki(?:\.sxisa|pedia)\.org/))
             RedirectPage.wiki();
-        else if (locHost == 'chrome.google.com')
+        else if (locHost == "chrome.google.com")
             RedirectPage.chrome();
         else {
             if (locHost === "developer.mozilla.org") RedirectPage.mozilla();
             else if (locHost === "docs.microsoft.com") RedirectPage.MSDocs();
             
-            let isChromium = navigator.appVersion.includes('Chrome');
+            let isChromium = navigator.appVersion.includes("Chrome");
             
             $(document).on("mouseup", (obj) => listener(obj));
             
-            if (isChromium && (locHost == 'www.52pojie.cn' || /htm_(data|mob)\/\d+\/\d+\/\d+\.html|cl.\d+[xyz].xyz\/\w+\.php.*/.test(locHref)))
+            if (isChromium && (locHost == "www.52pojie.cn" || /htm_(data|mob)\/\d+\/\d+\/\d+\.html|cl.\d+[xyz].xyz\/\w+\.php.*/.test(locHref)))
                 $(document).on("selectstart", (obj) => listener(obj));
             
-            if (locHost.includes('blog.csdn.net'))
-                document.body.addEventListener('click', function (obj) {
+            if (locHost.includes("blog.csdn.net"))
+                document.body.addEventListener("click", function (obj) {
                     let e = obj.target;
-                    if (e.nodeName.toLocaleLowerCase() === 'a') {
+                    if (e.nodeName.toLocaleLowerCase() === "a") {
                         obj.stopImmediatePropagation();
                         window.open(e.href);
                         obj.preventDefault();
@@ -998,13 +997,14 @@ $(function () {
             
             if (locHost === "www.yuque.com") {
                 setTimeout(() => {
-                    let article = $('#content');
+                    let article = $("#content");
                     article.replaceWith(article.clone());
                 }, 3000);
             }
             
-            if (locHost === "hub.fastgit.org") {
-                $('div.position-relative.mr-3, div.position-relative.mr-3+a, div.d-flex.flex-items-center>a').remove();
+            // 移除登录和注册按钮
+            if (["hub.fastgit.org", "github.com.cnpmjs.org", "github.rc1844.workers.dev"].some(h => locHost === h)) {
+                $(".HeaderMenu div.position-relative.mr-3, div.position-relative.mr-3+a, div.d-flex.flex-items-center>a").remove();
                 if (location.pathname === "/")
                     $("form div.d-flex, div.home-nav-hidden>a").remove();
             }
@@ -1134,25 +1134,25 @@ $(function () {
                         } else if (locHost !== "github.com" && a.host === "github.com") {
                             // Github
                             a.onclick = function() { return false; };
-                                isPrevent = true;
-                                await t.confirm('是否跳转到【fastgit】镜像站？',
-                                                () => {
-                                                    // 是
-                                                    //a.host = a.host.replace("github.com", "github.com.cnpmjs.org");
-                                                     a.host = a.host.replace("github.com", "hub.fastgit.org");
-                                                    // a.host = a.host.replace("github.com", "github.rc1844.workers.dev");
-                                                    t.title(a, "已替换为fastgit镜像链接，请不要登录帐号！！！");
-                                                    setTimeout(() => t.showNotice('镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！'), 1000);
-                                                },
-                                                () => {
-                                                    // 否
-                                                },
-                                                () => {
-                                                    // 取消
-                                                    isPrevent = false;
-                                                    a.onclick = null;
+                            isPrevent = true;
+                            await t.confirm('是否跳转到【fastgit】镜像站？',
+                                            () => {
+                                                // 是
+                                                // a.host = a.host.replace("github.com", "github.com.cnpmjs.org");
+                                                a.host = a.host.replace("github.com", "hub.fastgit.org");
+                                                // a.host = a.host.replace("github.com", "github.rc1844.workers.dev");
+                                                t.title(a, "已替换为fastgit镜像链接，请不要登录帐号！！！");
+                                                setTimeout(() => t.showNotice('镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！'), 1000);
+                                            },
+                                            () => {
+                                                // 否
+                                            },
+                                            () => {
+                                                // 取消
+                                                isPrevent = false;
+                                                a.onclick = null;
 
-                                });
+                            });
                         } else if (a.host.includes("chrome.google.com")) {
                             // 谷歌应用商店
                             if (isChromium) {
@@ -1200,7 +1200,7 @@ $(function () {
                     
                     if (isPrevent) {
                         a.onclick = null;
-                        t.open(a.href);
+                        a.click();
                     }
                 }
             }
@@ -1479,11 +1479,9 @@ $(function () {
                         if (!/t\d+\.html/i.test(temp)) {
                             let href = decodeURIComponent(
                                 decodeURIComponent(
-                                    result[3]
-                                        ? "http://" + result[3]
-                                        : result[2].startsWith("http")
+                                    result[2].startsWith("http")
                                         ? result[2]
-                                        : location.origin + result[2]
+                                        : "http://" + result[2]
                                 )
                             );
 

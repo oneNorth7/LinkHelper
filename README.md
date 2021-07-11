@@ -6,7 +6,7 @@
 
 * 全新重构版本，兼容**PC端Firefox、Chrome、Edge**三大主流浏览器，逐一通过各项功能测试；国产浏览器大多基于 [Chromium](https://www.chromium.org/) 开源项目二次开发，理应兼容
 * 扩充自动填写密码的网盘支持列表，囊括**大部分主流网盘及小众网盘**（持续更新中，**欢迎反馈**新的需要自动填写密码的云盘）
-* **目前唯一支持阿里云网盘自动填写密码的脚本**（官方验证机制比较繁琐，自行调试研究在Firefox下实现突破，后又多次钻研终于解决Chrome浏览器兼容问题，炫耀一下耶）
+* **目前唯一支持阿里云盘自动填写密码的脚本**（官方验证机制比较繁琐，自行调试研究在Firefox下实现突破，后又多次钻研终于解决Chrome浏览器兼容问题，炫耀一下耶）
 
 ## 虽然移除重定向很方便，但是网络环境复杂，使用前请仔细确认站点可信度和链接安全性！！！
 
@@ -18,7 +18,7 @@
 
     * 自动填写密码: [百度云](https://pan.baidu.com)、[百度企业网盘](https://eyun.baidu.com)、[百度云文档](https://pan.baidu.com/doc)、[天翼云](https://cloud.189.cn)、[蓝奏云](https://www.lanzou.com)、[微盘](https://vdisk.weibo.com)、[微云](https://share.weiyun.com)、[迅雷云盘](https://pan.xunlei.com)、[115网盘](http://115.com)、[和彩云](https://caiyun.139.com)、[曲奇云](https://quqi.com)、[360安全云盘](https://yunpan.360.cn)、[超星云盘](https://pan-yz.chaoxing.com)、[文叔叔](https://www.wenshushu.cn)、[坚果云](https://www.jianguoyun.com)、[闪电盘](https://shandianpan.com)、[OneDrive](https://my.sharepoint.com)、[网易邮箱网盘](http://u.163.com)、[阿里云盘](https://www.aliyundrive.com)、[小麦魔方](https://mo.own-cloud.cn)、[萌云|清玖云](https://cloud.qingstore.cn)、[ME Drive云盘](https://pan.mebk.org)、[小太阳云存储](https://cncncloud.com)、[比邻云盘](https://pan.bilnn.com)、[信爱云](https://ilolita945.softether.net:5212)、[my-file](https://my-file.cn)、[玖麦云](https://bx.qingstore.cn)、[MBA网盘](https://pan.mba)、[gofile](https://gofile.me)、[90网盘](https://www.90pan.com)、部分城通网盘
 
-2. 跳转页面自动跳转（[微博短链](http://t.cn/A6tkAViV#ujya)、[书签地球](http://show.bookmarkearth.com/view/784?folderId=45371)、[阳光盒子](https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz)、[开发者知识库](https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==)、[CSDN](https://link.csdn.net/?target=https%3A%2F%2Fgreasyfork.org%2Fzh-CN)、[不死鸟](https://niao.su/go/aHR0cDovL2NyeGRvd24uY29t)、[也许吧](https://www.imaybes.cc/wl?url=zqms0diflZDTp8XZZ5el0Q,,)、[天眼查](http://www.tianyancha.com)、[语雀](https://www.yuque.com/r/goto?url=https%3A%2F%2Fgitee.com)、[百度贴吧](http://jump2.bdimg.com/safecheck/index?url=) 等等）
+2. 跳转页面自动跳转（[新浪短链](http://t.cn/RgAKoPE)、[新浪绿色上网](http://t.cn/A6qYCh4U)、[书签地球](http://show.bookmarkearth.com/view/81484)、[阳光盒子](https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz)、[开发者知识库](https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==)、[CSDN](https://link.csdn.net/?target=https%3A%2F%2Fgreasyfork.org%2Fzh-CN)、[天眼查](http://www.tianyancha.com)、[语雀](https://www.yuque.com/r/goto?url=https%3A%2F%2Fgitee.com)、[百度贴吧](http://jump2.bdimg.com/safecheck/index?url=) 等等）
 
 3. 点击链接文本自动转成链接（支持**http链接、磁力链接、电驴链接、迅雷链接、邮箱链接**），默认转换后**不会自动跳转**（**上述支持的网盘或文档链接、40位哈希码的磁力链接、ed2k开头的电驴链接、thunder开头的迅雷链接及自定义域名的链接除外**）
 
@@ -67,6 +67,8 @@
 
 ## 更新信息
 
+* V1.9.1 - 更新书签地球选择器；新增新浪绿色上网页面自动跳转；新增智软酷下载页面预处理功能
+
 * V1.9.0 - 优化阿里云盘自动填写密码功能；新增点击Github链接询问是否转`fastgit`镜像链接功能
 
 * V1.8.9 - 优化阿里云盘自动填写密码功能；新增蓝鲨下载页面网盘密码预处理功能
@@ -96,6 +98,7 @@
 * [Text To link](https://greasyfork.org/zh-CN/scripts/342-text-to-link)
 * [网盘自动填写访问码【威力加强版】](https://greasyfork.org/zh-CN/scripts/29762-%E7%BD%91%E7%9B%98%E8%87%AA%E5%8A%A8%E5%A1%AB%E5%86%99%E8%AE%BF%E9%97%AE%E7%A0%81-%E5%A8%81%E5%8A%9B%E5%8A%A0%E5%BC%BA%E7%89%88)
 * [FastGithub 镜像加速访问、克隆和下载](https://greasyfork.org/zh-CN/scripts/397419-fastgithub-%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E8%AE%BF%E9%97%AE-%E5%85%8B%E9%9A%86%E5%92%8C%E4%B8%8B%E8%BD%BD)
+* [redirect 外链跳转](https://greasyfork.org/zh-CN/scripts/416338-redirect-%E5%A4%96%E9%93%BE%E8%B7%B3%E8%BD%AC)
 
 ## 关注赞赏
 
