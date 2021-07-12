@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.1
+// @version         1.9.2
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -144,7 +144,7 @@ $(function () {
         },
 
         subscribe() {
-            let isFollowed = t.get('isFollowed', false), least_times = t.get('least_times', 50);
+            let isFollowed = t.get('isFollowed', false), least_times = t.get('least_times', 30);
             success_times = +this.get("success_times");
             if (success_times > least_times && !isFollowed) {
                 Swal.fire({
@@ -169,7 +169,7 @@ $(function () {
                               timer: 2000
                             });
                             t.set('isFollowed', true);
-                          } else t.set('least_times', least_times + 50);
+                          } else t.set('least_times', least_times + 30);
                         });
             }
         },
@@ -188,9 +188,16 @@ $(function () {
                 }
             }
         },
+        
+        rand(min, max) {
+            if (arguments.length == 1) max = min, min = 0;
+            let random = Math.random(),
+                randInt = Math.floor(random * (max + 1 - min)) + min;
+            return randInt;
+        },
     };
 
-    let url_re_str = "((?<![.@])\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*]+|(?<!@)(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*\\u4e00-\\u9fa5]*)?)",
+    let url_re_str = "((?<![.@])\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*]+|(?<!@)(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*\\u4e00-\\u9fa5]*)?)",
         url_regexp = new RegExp("\\b(" + url_re_str +
                             "|" +
                             "ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/" + 
@@ -323,6 +330,17 @@ $(function () {
                     a.href = a.dataset.id
                     let result = a.textContent.match(":(\\w{2,10})");
                     if (result) a.hash = result[1];
+                });
+            }
+        },
+        
+        "zhidao.baidu.com": function () {
+            if (/https:\/\/zhidao\.baidu\.com\/question\/\d+\.html.*/.test(locHref)) {
+                $("baiduyun.ikqb-yun-box").each((i, e) => {
+                    let title = $(e).attr("data_title"),
+                        url = $(e).attr("data_sharelink") + "#" + $(e).attr("data_code"),
+                        p = $(e).parent("p");
+                    p.before(`<p style="font-size:24px"><a href="${url}" title="点我可自动填写密码！" target="_blank"><span style="color:#36BE63">预处理链接：</span>${title}</a></p>`);
                 });
             }
         },
@@ -868,24 +886,27 @@ $(function () {
             },
 
             mozilla() {
-                let isZh = locPath.includes("zh-CN"),
+                let isZh = locPath.includes("zh-"),
                     jumpToZh = t.get("jumpToZh", true);
                 jump();
                 function jump() {
                     if (!isZh && jumpToZh) {
                         let result = /developer\.mozilla\.org\/(.+?)\//.exec(
                             locHref
-                        ), options = $("#language-selector").children(), flag = false;
+                        ), options = $("#language-selector").children(), flag = "";
 
                         if (result) {
                             for (let i = options.length; i > 0; i--) {
-                                if (options[i - 1].value === "zh-CN") {
-                                    flag = true;
-                                    break;
+                                if (options[i - 1].value.startsWith("zh-")) {
+                                    if (flag) {
+                                        flag = options[i - 1].value;
+                                        break;
+                                    }
+                                    flag = options[i - 1].value;
                                 }
                             }
                             if (flag) {
-                                let zh_url = locHref.replace(result[1], "zh-CN");
+                                let zh_url = locHref.replace(result[1], flag);
                                 history.pushState(null, null, locHref);
                                 location.replace(zh_url);
                             }
@@ -1133,16 +1154,22 @@ $(function () {
                                 );
                         } else if (locHost !== "github.com" && a.host === "github.com") {
                             // Github
+                            let mirrors = [
+                                            ["fastgit", "hub.fastgit.org"],
+                                            ["cnpmjs", "github.com.cnpmjs.org"],
+                                            ["rc1844", "github.rc1844.workers.dev"]
+                                          ],
+                                rand = t.rand(1, 9) % 3,
+                                mirror = mirrors[rand],
+                                next = mirrors[(rand + 1) % 3];
                             a.onclick = function() { return false; };
                             isPrevent = true;
-                            await t.confirm('是否跳转到【fastgit】镜像站？',
+                            await t.confirm(`是否跳转到【${mirror[0]}】镜像站？`,
                                             () => {
                                                 // 是
-                                                // a.host = a.host.replace("github.com", "github.com.cnpmjs.org");
-                                                a.host = a.host.replace("github.com", "hub.fastgit.org");
-                                                // a.host = a.host.replace("github.com", "github.rc1844.workers.dev");
-                                                t.title(a, "已替换为fastgit镜像链接，请不要登录帐号！！！");
-                                                setTimeout(() => t.showNotice('镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！'), 1000);
+                                                a.host = a.host.replace("github.com", mirror[1]);
+                                                t.title(a, `已替换为【${mirror[0]}】镜像链接，请不要登录帐号！！！`);
+                                                setTimeout(() => t.showNotice("镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！"), 1000);
                                             },
                                             () => {
                                                 // 否
@@ -1151,8 +1178,7 @@ $(function () {
                                                 // 取消
                                                 isPrevent = false;
                                                 a.onclick = null;
-
-                            });
+                                            });
                         } else if (a.host.includes("chrome.google.com")) {
                             // 谷歌应用商店
                             if (isChromium) {
