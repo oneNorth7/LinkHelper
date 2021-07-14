@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.2
+// @version         1.9.3
 // @author          一个北七
 // @run-at          document-body
 // @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -670,7 +670,7 @@ $(function () {
                                                {
                                                     type: "POST", data,
                                                     success: res => localStorage.setItem('shareToken', JSON.stringify(res))
-                                               }).then(() => location.reload());
+                                               }).then(() => location.reload(), () => t.showNotice("提取码错误，请反馈网盘链接来源地址给作者处理！"));
                                 } else if (site.react) {
                                     let lastValue = input.val();
                                     input.val(code);
@@ -726,13 +726,13 @@ $(function () {
                             site.regStr +
                             ")|^[码碼]?\\s*[:：【\\[ （(]?\\s*(" +
                             site.regStr +
-                            ")[】\\]]?$",
+                            ")[】\\])）]?$",
                         "i"
                     ),
                     code = reg.exec($(a).text().trim());
                 for (
                     let i = 10, current = a;
-                    current && !code && i > 0;
+                    current && current.localName != "body" && !code && i > 0;
                     i--, current = current.parentElement
                 ) {
                     let next = current;
@@ -813,7 +813,7 @@ $(function () {
                 "www.tianyancha.com": {
                     // 天眼查
                     include: "www.tianyancha.com/security?target=",
-                    selector: "a.security-btn",
+                    selector: "div.security-link",
                 },
                 
                 "www.yuque.com": {
@@ -1627,6 +1627,7 @@ $(function () {
                                 position: absolute;
                                 z-index: 1;
                                 left: -16px;
+                                user-select: none;
                             }
                             #L_DirectInput {
                                 width: 300px;
@@ -1638,6 +1639,7 @@ $(function () {
                                 background-color: #99adf7;
                                 padding-left: 10px;
                                 box-sizing: content-box;
+                                user-select: none;
                             }
                             `);
                 
