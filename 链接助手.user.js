@@ -2,10 +2,10 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.3
+// @version         1.9.4
 // @author          一个北七
 // @run-at          document-body
-// @description     大部分主流网盘和小众网盘自动填写密码; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
+// @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
 // @icon            https://gitee.com/oneNorth7/pics/raw/master/picgo/link-helper.png
 // @compatible      chrome 69+
 // @compatible      firefox 78+
@@ -208,15 +208,6 @@ $(function () {
                             ")", "i");
     
     let Preprocess = {
-        "www.38hack.com": function () {
-            if (/http:\/\/www\.38hack\.com\/\d+\.html/.test(locHref)) {
-                let lines = $("div.down-line");
-
-                if (lines.length)
-                    lines.last().append(lines.first().prev().prev());
-            }
-        },
-
         "www.mikuclub.xyz": function () {
             if (/https:\/\/www\.mikuclub\.xyz\/\d+/.test(locHref)) {
                 let password = $(".password1"),
@@ -342,6 +333,19 @@ $(function () {
                         p = $(e).parent("p");
                     p.before(`<p style="font-size:24px"><a href="${url}" title="点我可自动填写密码！" target="_blank"><span style="color:#36BE63">预处理链接：</span>${title}</a></p>`);
                 });
+            }
+        },
+        
+        "yun.hei521.cn": function () {
+            let text = $("#comments .ds-comment-body p:contains('码')").text();
+            if (text) {
+                let codes = text.match(/[a-z\d]{4}/g);
+                if (codes)
+                    $("div.jumbotron a:contains('http')").each((i, a) => {
+                        let result = a.nextSibling && a.nextSibling.nodeValue && a.nextSibling.nodeValue.match(/[a-z\d]{4}/);
+                        if (result) a.hash = "#" + result[0];
+                        else if (codes[i]) a.hash = "#" + codes[i];
+                    });
             }
         },
     };
@@ -709,54 +713,58 @@ $(function () {
             let mapped = this.mapHost(a.host),
                 site = this.sites[mapped],
                 codeRe = new RegExp("^" + site.regStr + "$", "i");
-            if (site.password) {
-                let result = a.hash && /#(\/s\/\w{6})/.exec(a.hash);
-                if (result)
-                    if (a.pathname == '/') {
-                        a.pathname = result[1];
-                        a.hash = '';
-                    }
-            } else if (site.redirect) {
-                a.host = a.host.replace('lanzous', 'lanzoux');
-            }
-            
-            if (!codeRe.test(t.hashcode(a)) && !codeRe.test(t.search(a))) {
-                let reg = new RegExp(
-                        "\\s*(?:提[取示]|访问|查阅|密\\s*|艾|Extracted-code|key|password|pwd)[码碼]?\\s*[\\u4e00-\\u9fa5]?[:： （(是]?\\s*(" +
-                            site.regStr +
-                            ")|^[码碼]?\\s*[:：【\\[ （(]?\\s*(" +
-                            site.regStr +
-                            ")[】\\])）]?$",
-                        "i"
-                    ),
-                    code = reg.exec($(a).text().trim());
-                for (
-                    let i = 10, current = a;
-                    current && current.localName != "body" && !code && i > 0;
-                    i--, current = current.parentElement
-                ) {
-                    let next = current;
-                    while (!code) {
-                        if (!next) break;
-                        else code = reg.exec($(next).text().trim());
-                        
-                        if (a.host === "www.aliyundrive.com") next = next.previousSibling;
-                        else next = next.nextSibling;
-                    }
-                }
+            if (site) {
+				if (site.password) {
+					let result = a.hash && /#(\/s\/\w{6})/.exec(a.hash);
+					if (result)
+						if (a.pathname == '/') {
+							a.pathname = result[1];
+							a.hash = '';
+						}
+				} else if (site.redirect) {
+					a.host = a.host.replace('lanzous', 'lanzoux');
+				}
+				
+				if (!codeRe.test(t.hashcode(a)) && !codeRe.test(t.search(a))) {
+					let reg = new RegExp(
+							"\\s*(?:提[取示]|访问|查阅|密\\s*|艾|Extracted-code|key|password|pwd)[码碼]?\\s*[\\u4e00-\\u9fa5]?[:： （(是]?\\s*(" +
+								site.regStr +
+								")|^[码碼]?\\s*[:：【\\[ （(]?\\s*(" +
+								site.regStr +
+								")[】\\])）]?$",
+							"i"
+						),
+						code = reg.exec($(a).text().trim());
+					for (
+						let i = 10, current = a;
+						current && current.localName != "body" && !code && i > 0;
+						i--, current = current.parentElement
+					) {
+						if (locHost === "yun.hei521.cn" && current.className === "row row-offcanvas row-offcanvas-right")
+                            break;
+						let next = current;
+						while (!code) {
+							if (!next) break;
+							else code = reg.exec($(next).text().trim());
+							
+							if (a.host === "www.aliyundrive.com") next = next.previousSibling;
+							else next = next.nextSibling;
+						}
+					}
 
-                if (code) {
-                    let c = code[1] || code[2];
-                    if (site.store) t.set(mapped, c);
-                    else if (site.password) {
-                        if (!t.search(a))
-                            a.search = a.search ? a.search + '&' + 'password=' + encodeURIComponent(c) : 'password=' + encodeURIComponent(c);
-                    } else a.hash = c;  
-                } else {
-                    if (site.store) t.delete(mapped);
-                    t.clog("找不到code!");
-                }
-            }
+					if (code) {
+						let c = code[1] || code[2];
+						if (site.store) t.set(mapped, c);
+						else if (site.password) {
+							if (!t.search(a))
+								a.search = a.search ? a.search + '&' + 'password=' + encodeURIComponent(c) : 'password=' + encodeURIComponent(c);
+						} else a.hash = c;  
+					} else {
+						if (site.store) t.delete(mapped);
+						t.clog("找不到code!");
+					}
+				}
+			}
         },
     };
     let success_times = t.get("success_times");
@@ -806,8 +814,22 @@ $(function () {
                 },
                 
                 "support.qq.com": {
+					// 兔小巢
                     include: "support.qq.com/products/",
                     selector: "span.link_url",
+                },
+                
+                "c.pc.qq.com": {
+                    // QQ非官方页面
+                    include: "c.pc.qq.com/middlem.html?pfurl=",
+                    selector: "#url",
+                },
+                
+                "docs.qq.com": {
+                    // 腾讯文档
+                    include: "docs.qq.com/scenario/link.html?url=",
+                    selector: "span.url-src",
+                    timeout: 500,
                 },
                 
                 "www.tianyancha.com": {
@@ -834,6 +856,24 @@ $(function () {
                     include: "jump2.bdimg.com/safecheck/index?url=",
                     selector: "div.warning_info.fl>a",
                 },
+                
+                "iphone.myzaker.com" : {
+                    // Zaker
+                    include: "iphone.myzaker.com/zaker/link.php?",
+                    selector: "a.btn",
+                },
+                
+                "game.bilibili.com": {
+                    // 哔哩哔哩游戏
+                    include: "/linkfilter/?url=",
+                    selector: "#copy-url",
+                },
+                
+                "www.chinaz.com": {
+                    // 站长之家
+                    include: "/go.shtml?url=",
+                    selector: "div.link-bd__text",
+                },
             },
 
             redirect(host) {
@@ -844,7 +884,7 @@ $(function () {
                     
                     function redirect() {
                         let target = $(site.selector);
-                        if (target.length) location.replace(target[0].href || target[0].innerText);
+                        if (target.length) location.replace(t.http(target[0].href || target[0].innerText));
                         else if (locHost == "t.cn" && $("div.text:contains('绿色上网')").length)
                             fetch(locHref).then(res => location.replace(res.headers.get("location")));
                         else t.clog('找不到跳转目标！');
@@ -1505,9 +1545,7 @@ $(function () {
                         if (!/t\d+\.html/i.test(temp)) {
                             let href = decodeURIComponent(
                                 decodeURIComponent(
-                                    result[2].startsWith("http")
-                                        ? result[2]
-                                        : "http://" + result[2]
+                                    t.http(result[2])
                                 )
                             );
 
