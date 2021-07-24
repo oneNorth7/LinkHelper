@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.4
+// @version         1.9.5
 // @author          一个北七
 // @run-at          document-body
 // @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -197,7 +197,7 @@ $(function () {
         },
     };
 
-    let url_re_str = "((?<![.@])\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*]+|(?<!@)(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*\\u4e00-\\u9fa5]*)?)",
+    let url_re_str = "((?<![.@])\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@]+|(?<!@)(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@\\u4e00-\\u9fa5]*)?)",
         url_regexp = new RegExp("\\b(" + url_re_str +
                             "|" +
                             "ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/" + 
@@ -629,7 +629,7 @@ $(function () {
             else fillOnce();
             function fillOnce() {
                 if (site.inputSelector) {
-                    let input = $(site.inputSelector),
+                    let input = $(site.inputSelector + ":visible"),
                         button = $(site.buttonSelector),
                         code = null;
                     function click() {
@@ -778,7 +778,7 @@ $(function () {
                 "show.bookmarkearth.com": {
                     // 书签地球
                     include: "http://show.bookmarkearth.com/view/",
-                    selector: "a.open-in-new-window, div.actions>a",
+                    selector: "p.link",
                 },
 
                 "t.cn": {
@@ -1049,10 +1049,12 @@ $(function () {
             if (locHost.includes("blog.csdn.net"))
                 document.body.addEventListener("click", function (obj) {
                     let e = obj.target;
-                    if (e.nodeName.toLocaleLowerCase() === "a") {
-                        obj.stopImmediatePropagation();
-                        window.open(e.href);
-                        obj.preventDefault();
+                    if (e.localName === "a") {
+						if (e.id !== "btn-readmore-zk") {
+							obj.stopImmediatePropagation();
+							if (e.host !== "github.com") window.open(e.href);
+							obj.preventDefault();
+						}
                     }
                 }, true);
             
@@ -1213,6 +1215,7 @@ $(function () {
                                             },
                                             () => {
                                                 // 否
+                                                if (locHost === "blog.csdn.net") t.open(a.href);
                                             },
                                             () => {
                                                 // 取消
@@ -1324,7 +1327,7 @@ $(function () {
             
             function textToLink(e) {
                 if (
-                    !["body", "code", "pre", "select", "main", "input", "textarea"].some(
+                    !["body", "code", "pre", "select", "main", "input", "textarea", "footer"].some(
                         (tag) => tag === e.localName
                     ) &&
                     !["www.google."].some((h) => locHost.includes(h))
@@ -1339,7 +1342,7 @@ $(function () {
                         ) {
                             let child = e.childNodes[i];
                             if (
-                                !["a", "br", "code", "pre", "img", "script", "option", "input", "textarea"].some(
+                                !["body", "a", "br", "code", "pre", "img", "script", "option", "input", "textarea", "footer"].some(
                                     (tag) => tag === child.localName
                                 ) && 
                                 child.className !== "textToLink" &&
@@ -1352,7 +1355,7 @@ $(function () {
                                     span.html(
                                         text.replace(url_regexp_g, function ($1) {
                                             count++;
-                                            if ($1.includes("@")) return `<a href="mailto:${$1}">${$1}</a>`;
+                                            if ($1.includes("@") && !$1.match(/^https?:\/\/|\/@?/)) return `<a href="mailto:${$1}">${$1}</a>`;
                                             return $1.startsWith("http")
                                                 ? `<a href="${$1}" target="_blank">${$1}</a>`
                                                 : $1.includes("magnet") || $1.includes("ed2k")
@@ -1382,7 +1385,7 @@ $(function () {
                         span.html(
                             text.replace(url_regexp_g, function ($1) {
                                 count++;
-                                if ($1.includes("@")) return `<a href="mailto:${$1}">${$1}</a>`;
+                                if ($1.includes("@") && !$1.match(/^https?:\/\/|\/@?/)) return `<a href="mailto:${$1}">${$1}</a>`;
                                 return $1.startsWith("http")
                                     ? `<a href="${$1}" target="_blank">${$1}</a>`
                                     : $1.includes("magnet") || $1.includes("ed2k")
@@ -1658,6 +1661,7 @@ $(function () {
                                 position: fixed;
                                 left: 0;
                                 top: 25%;
+                                z-index: 9999;
                             }
                             #L_DirectButton {
                                 width: 30px;
@@ -1666,6 +1670,10 @@ $(function () {
                                 z-index: 1;
                                 left: -16px;
                                 user-select: none;
+                                padding: 0;
+                                border: none;
+                                background: transparent;
+                                box-shadow: none;
                             }
                             #L_DirectInput {
                                 width: 300px;
@@ -1678,6 +1686,11 @@ $(function () {
                                 padding-left: 10px;
                                 box-sizing: content-box;
                                 user-select: none;
+                                padding: 0;
+                                box-shadow: none;
+                            }
+                            #L_DirectInput::placeholder {
+                                color: #333;
                             }
                             `);
                 
