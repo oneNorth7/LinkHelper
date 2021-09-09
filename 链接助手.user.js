@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.5
+// @version         1.9.6
 // @author          一个北七
 // @run-at          document-body
 // @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -11,18 +11,26 @@
 // @compatible      firefox 78+
 // @compatible      edge Latest
 // @noframes
-// @license         GPL-3.0 License
-// @grant           GM_registerMenuCommand
-// @grant           GM_unregisterMenuCommand
-// @grant           GM_notification
-// @grant           GM_info
-// @grant           GM_setValue
-// @grant           GM_getValue
-// @grant           GM_deleteValue
-// @grant           GM_openInTab
-// @grant           GM_addStyle
-// @require         https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
-// @require         https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js
+// @license           GPL-3.0 License
+// @exclude         *://www.kdocs.cn/p/*
+// @exclude         *://docs.google.com/document/d/*
+// @exclude         *://www.notion.so/*
+// @exclude         *://www.wolai.com/*
+// @exclude         *://yiqixie.qingque.cn/d/home/*
+// @exclude         *://www.yuque.com/*/edit
+// @exclude         *://*.cqaso.com/*
+// @exclude         *://mail.*
+// @grant              GM_registerMenuCommand
+// @grant              GM_unregisterMenuCommand
+// @grant              GM_notification
+// @grant              GM_info
+// @grant              GM_setValue
+// @grant              GM_getValue
+// @grant              GM_deleteValue
+// @grant              GM_openInTab
+// @grant              GM_addStyle
+// @require          https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
+// @require          https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js
 // @created         2021年3月19日 09:48:14
 // ==/UserScript==
 
@@ -49,6 +57,9 @@ $(function () {
         
         clog() {
             console.group('[链接助手]');
+            if (locHost === "cloud.189.cn")
+                console.log = console.dir;
+
             for (let m of arguments) {
                 if (void 0 !== m) console.log(m);
             }
@@ -183,9 +194,9 @@ $(function () {
                             data.push(v);
                         }
                     }
-                    this.set('updated_version', scriptInfo.version);
                     this.set(name, data);
                 }
+                this.set('updated_version', scriptInfo.version);
             }
         },
         
@@ -197,14 +208,15 @@ $(function () {
         },
     };
 
-    let url_re_str = "((?<![.@])\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@]+|(?<!@)(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@\\u4e00-\\u9fa5]*)?)",
+    let url_re_str = "(?<![.@])\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@]+|(?<!@)(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@\\u4e00-\\u9fa5]*)?",
+        base64_re_str = "([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)(?![A-Za-z0-9+/])",
         url_regexp = new RegExp("\\b(" + url_re_str +
                             "|" +
                             "ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/" + 
                             "|" +
                             "magnet:\\?xt=urn:btih:\\w{40}(&[\\w\\s]+)?" +
                             "|" +
-                            "(?:thunder:\\/\\/([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)(?![A-Za-z0-9+/]))" +
+                            "thunder:\\/\\/" + base64_re_str +
                             ")", "i");
     
     let Preprocess = {
@@ -276,16 +288,7 @@ $(function () {
                 }
             }
         },
-        
-        "www.gopojie.net": function () {
-            if (/https:\/\/www\.gopojie\.net\/download\?post_id=/.test(locHref)) {
-                setTimeout(() => {
-                    let a = $('a.empty.button'), url = a.prop('href'), code = $('#tq').attr('data-clipboard-text');
-                    if (url) a.prop('href', url + '#' + code);
-                }, 1000);
-            }
-        },
-        
+
         "www.acgjc.com": function () {
             if (/http:\/\/www.acgjc.com\/storage-download\/\?code=/.test(locHref)) {
                 let codeNode = $('#theme_custom_storage-0-download-pwd');
@@ -337,15 +340,24 @@ $(function () {
         },
         
         "yun.hei521.cn": function () {
-            let text = $("#comments .ds-comment-body p:contains('码')").text();
-            if (text) {
-                let codes = text.match(/[a-z\d]{4}/g);
-                if (codes)
-                    $("div.jumbotron a:contains('http')").each((i, a) => {
-                        let result = a.nextSibling && a.nextSibling.nodeValue && a.nextSibling.nodeValue.match(/[a-z\d]{4}/);
-                        if (result) a.hash = "#" + result[0];
-                        else if (codes[i]) a.hash = "#" + codes[i];
-                    });
+            let text = $("ol.comment-list .zface-box p:contains('码')").text();
+            if (!addCode(text)) {
+                text = $("div.post-content p:contains('码')").text();
+                addCode(text);
+            }
+            
+            function addCode(text) {
+                if (text) {
+                    let codes = text.match(/码[:：]\s*[a-z\d]{4}/g);
+                    if (codes) {
+                        $("div.post-content a:contains('http')").each((i, a) => {
+                            let result = a.nextSibling && a.nextSibling.nodeValue && a.nextSibling.nodeValue.match(/[a-z\d]{4}/);
+                            if (result) a.hash = "#" + result[0];
+                            else if (codes[i]) a.hash = "#" + codes[i].replace(/码[:：]\s*/, "");
+                        });
+                        return true;
+                    } 
+                }
             }
         },
     };
@@ -580,7 +592,9 @@ $(function () {
             "gd.188988.xyz", // GD DISK
             "www.yun.cn", // UC网盘
             "www.yuque.com", // 语雀
-            "shimo.im", // 石墨
+            "shimo.im", // 石墨文档
+            "www.showdoc.com.cn", // ShowDoc
+            "zijieyunpan.com", // 字节网盘
         ],
 
         mapHost(host) {
@@ -709,6 +723,10 @@ $(function () {
             // 手机百度云
             if (a.host === "pan.baidu.com" && a.pathname.startsWith('/wap/'))
                 a.pathname = a.pathname.replace('/wap/', '/share/');
+
+            // 手机天翼云
+            if (a.host === "h5.cloud.189.cn" && a.pathname === "/share.html")
+                a.href = a.href.replace("h5.cloud.189.cn/share.html#/t/", "cloud.189.cn/web/share?code=");
             
             let mapped = this.mapHost(a.host),
                 site = this.sites[mapped],
@@ -740,7 +758,7 @@ $(function () {
 						current && current.localName != "body" && !code && i > 0;
 						i--, current = current.parentElement
 					) {
-						if (locHost === "yun.hei521.cn" && current.className === "row row-offcanvas row-offcanvas-right")
+						if (locHost === "yun.hei521.cn" && current.id === "main")
                             break;
 						let next = current;
 						while (!code) {
@@ -1041,16 +1059,16 @@ $(function () {
             
             let isChromium = navigator.appVersion.includes("Chrome");
             
-            $(document).on("mouseup", (obj) => listener(obj));
-            
-            if (isChromium && (locHost == "www.52pojie.cn" || /htm_(data|mob)\/\d+\/\d+\/\d+\.html|cl.\d+[xyz].xyz\/\w+\.php.*/.test(locHref)))
-                $(document).on("selectstart", (obj) => listener(obj));
+            if (isChromium)
+                $(document).on("selectstart mousedown", (obj) => listener(obj));
+            else
+                $(document).on("mouseup", (obj) => listener(obj));
             
             if (locHost.includes("blog.csdn.net"))
                 document.body.addEventListener("click", function (obj) {
                     let e = obj.target;
-                    if (e.localName === "a") {
-						if (e.id !== "btn-readmore-zk") {
+                    if (e.localName === "a" && e.href && e.href.match(url_re_str)) {
+						if (e.id !== "btn-readmore-zk" && !(e.attributes.href && e.attributes.href.nodeValue.startsWith("#"))) {
 							obj.stopImmediatePropagation();
 							if (e.host !== "github.com") window.open(e.href);
 							obj.preventDefault();
@@ -1113,7 +1131,6 @@ $(function () {
                     if (e.localName !== "a" && flag) {
                         let node = selectNode || e;
                         if (node && node.nodeValue) e = text2Link(node);
-                        else e = textToLink(e);
                         if (e)
                             isTextToLink = true;
                     }
@@ -1130,8 +1147,6 @@ $(function () {
                                 a.onclick = null;
                     }
                     
-                    if (locHost == "twitter.com" && a.host == "t.co") a.href = t.http(a.innerText, true);
-                    
                     if (locHost == "www.youtube.com" && a.href.includes("www.youtube.com/redirect?")) {
                         if (!a.style.padding) {
                             $("#secondary-links.ytd-c4-tabbed-header-renderer a.ytd-c4-tabbed-header-renderer").css({padding: "10px 10px 10px 2px", lineHeight: 0, display: "inline-block"});
@@ -1145,106 +1160,111 @@ $(function () {
                         t.open(a.href);
                     }
                     
-                    if (!cleanRedirectLink(a) && RegExp("^" + url_re_str + "$", "i").test(a.innerText)) {
-                        if (isLinkText(a)) {
-                            t.title(a, '【替换】');
-                            a.href = t.http(a.innerText, true);
-                            t.increase();
-                        }
-                        else if (!isTextToLink && !a.parentElement.className.includes('text2Link') && !a.parentElement.className.includes('textToLink') && locHost != 'www.facebook.com' && a.host != 'download.downsx.org' && isDifferent(a)) {
-                            a.onclick = function() { return false; };
-                            isPrevent = true;
-                            await t.confirm("是否使用链接文本替换目标链接后打开？",
-                                    () => {
-                                        // 是
-                                        let linkTextPrefixes = t.get("linkTextPrefixes", []),
-                                            reg = /(?:http|https|\/|\%2F).*?\?.+?=|.*?\?/,
-                                            result = reg.exec(a.href);
-                                        if (result) {
-                                            linkTextPrefixes.push(result[0]);
-                                            t.set("linkTextPrefixes", linkTextPrefixes);
-                                        }
-                                        t.title(a, '【替换】');
-                                        a.href = t.http(a.innerText, true);
-                                        t.increase();
-                                    },
-                                    () => {
-                                        // 否
-                                    },
-                                    () => {
-                                        // 取消
-                                        isPrevent = false;
-                                        a.onclick = null;
-                            });
-                        }
-                    }
-                    
-                    if (jumpToMirror) {
-                        if (a.host.includes("wikipedia.org")) {
-                            // 维基百科
-                            if (!locHost == "www.bing.com" || !locHost.includes("www.google."))
-                                a.host = a.host.replace(
-                                    "wikipedia.org",
-                                    "wiki.sxisa.org"
-                                );
-                        } else if (a.host.includes("developers.google.com")) {
-                            // 谷歌开发者
-                            if (!locHost == "developers.google.com")
-                                a.host = a.host.replace(
-                                    "developers.google.com",
-                                    "developers.google.cn"
-                                );
-                        } else if (locHost !== "github.com" && a.host === "github.com") {
-                            // Github
-                            let mirrors = [
-                                            ["fastgit", "hub.fastgit.org"],
-                                            ["cnpmjs", "github.com.cnpmjs.org"],
-                                            ["rc1844", "github.rc1844.workers.dev"]
-                                          ],
-                                rand = t.rand(1, 9) % 3,
-                                mirror = mirrors[rand],
-                                next = mirrors[(rand + 1) % 3];
-                            a.onclick = function() { return false; };
-                            isPrevent = true;
-                            await t.confirm(`是否跳转到【${mirror[0]}】镜像站？`,
-                                            () => {
-                                                // 是
-                                                a.host = a.host.replace("github.com", mirror[1]);
-                                                t.title(a, `已替换为【${mirror[0]}】镜像链接，请不要登录帐号！！！`);
-                                                setTimeout(() => t.showNotice("镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！"), 1000);
-                                            },
-                                            () => {
-                                                // 否
-                                                if (locHost === "blog.csdn.net") t.open(a.href);
-                                            },
-                                            () => {
-                                                // 取消
-                                                isPrevent = false;
-                                                a.onclick = null;
-                                            });
-                        } else if (a.host.includes("chrome.google.com")) {
-                            // 谷歌应用商店
-                            if (isChromium) {
+                    if (locHost !== "blog.csdn.net" && !cleanRedirectLink(a)) {
+						let text = a.innerText.trim();
+                        if (RegExp("^" + url_re_str + "$", "i").test(text)) {
+                            if (isLinkText(a)) {
+                                t.title(a, '【替换】');
+                                a.href = t.http(text, true);
+                                t.increase();
+                            } else if (locHost == "twitter.com" && a.host == "t.co")
+                                a.href = t.http(text.replace(/…$/, ""), true);
+                            else if (!isTextToLink && !a.parentElement.className.includes('text2Link') && locHost != 'www.facebook.com' && a.host != 'download.downsx.org' && isDifferent(a)) {
                                 a.onclick = function() { return false; };
                                 isPrevent = true;
-                                await t.confirm('是否跳转到【crx4chrome】镜像站？',
-                                                () => {
-                                                    // 是
-                                                    t.title(a);
-                                                    a.href = a.href.replace(/chrome\.google\.com\/webstore\/detail[\/\w\-%]*(?=\w{32})/i, 'www.crx4chrome.com/extensions/');
-                                                },
-                                                () => {
-                                                    // 否
-                                                },
-                                                () => {
-                                                    // 取消
-                                                    isPrevent = false;
-                                                    a.onclick = null;
-
+                                await t.confirm("是否使用链接文本替换目标链接后打开？",
+                                        () => {
+                                            // 是
+                                            let linkTextPrefixes = t.get("linkTextPrefixes", []),
+                                                reg = /(?:http|https|\/|\%2F).*?\?.+?=|.*?\?/,
+                                                result = reg.exec(a.href);
+                                            if (result) {
+                                                linkTextPrefixes.push(result[0]);
+                                                t.set("linkTextPrefixes", linkTextPrefixes);
+                                            }
+                                            t.title(a, '【替换】');
+                                            a.href = t.http(text, true);
+                                            t.increase();
+                                        },
+                                        () => {
+                                            // 否
+                                        },
+                                        () => {
+                                            // 取消
+                                            isPrevent = false;
+                                            a.onclick = null;
                                 });
                             }
                         }
                     }
+                    
+                    if (!obj.originalEvent.button || isTextToLink) {
+						if (jumpToMirror) {
+							if (a.host.includes("wikipedia.org")) {
+								// 维基百科
+								if (!locHost == "www.bing.com" && !locHost.includes("www.google."))
+									a.host = a.host.replace(
+										"wikipedia.org",
+										"wiki.sxisa.org"
+									);
+							} else if (a.host.includes("developers.google.com")) {
+								// 谷歌开发者
+								if (!locHost == "developers.google.com")
+									a.host = a.host.replace(
+										"developers.google.com",
+										"developers.google.cn"
+									);
+							} else if (locHost !== "github.com" && a.host === "github.com") {
+								// Github
+								let mirrors = [
+												["fastgit", "hub.fastgit.org"],
+												["cnpmjs", "github.com.cnpmjs.org"],
+												["rc1844", "github.rc1844.workers.dev"]
+											  ],
+									rand = t.rand(1, 9) % 3,
+									mirror = mirrors[rand],
+									next = mirrors[(rand + 1) % 3];
+								a.onclick = function() { return false; };
+								isPrevent = true;
+								await t.confirm(`是否跳转到【${mirror[0]}】镜像站？`,
+												() => {
+													// 是
+													t.title(a, `已替换为【${mirror[0]}】镜像链接，请不要登录帐号！！！`);
+													a.host = a.host.replace("github.com", mirror[1]);
+													setTimeout(() => t.showNotice("镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！"), 1000);
+												},
+												() => {
+													// 否
+													if (locHost === "blog.csdn.net") t.open(a.href);
+												},
+												() => {
+													// 取消
+													isPrevent = false;
+													a.onclick = null;
+												});
+							} else if (a.host.includes("chrome.google.com")) {
+								// 谷歌应用商店
+								if (isChromium) {
+									a.onclick = function() { return false; };
+									isPrevent = true;
+									await t.confirm('是否跳转到【crx4chrome】镜像站？',
+													() => {
+														// 是
+														t.title(a);
+														a.href = a.href.replace(/chrome\.google\.com\/webstore\/detail[\/\w\-%]*(?=\w{32})/i, 'www.crx4chrome.com/extensions/');
+													},
+													() => {
+														// 否
+													},
+													() => {
+														// 取消
+														isPrevent = false;
+														a.onclick = null;
+									});
+								}
+							}
+						}
+					}
                     
                     let pan = YunDisk.sites[YunDisk.mapHost(a.host)];
                     if (pan) YunDisk.addCode(a);
@@ -1262,7 +1282,7 @@ $(function () {
                         }
                     }
                     
-                    if (/^magnet:\?xt=urn:btih:|^ed2k:\/\/\|file\||^thunder:\/\//i.test(a.href))
+                    if (/^magnet:\?xt=urn:btih:|^ed2k:\/\/\|file\||^thunder:\/\/|^https?:\/\/www\.nruan\.com\/(page\/\d+)?/i.test(a.href))
                         $(a).removeAttr('target');
                     
                     add_blank(a);
@@ -1324,68 +1344,20 @@ $(function () {
             // }
             
             let url_regexp_g = new RegExp(url_regexp, "ig");
-            
-            function textToLink(e) {
-                if (
-                    !["body", "code", "pre", "select", "main", "input", "textarea", "footer"].some(
-                        (tag) => tag === e.localName
-                    ) &&
-                    !["www.google."].some((h) => locHost.includes(h))
-                ) {
-                    let span = null,
-                        count = 0;
-                    if (e.childNodes.length < 10)
-                        for (
-                            let i = e.childNodes.length - 1;
-                            i >= 0;
-                            i--
-                        ) {
-                            let child = e.childNodes[i];
-                            if (
-                                !["body", "a", "br", "code", "pre", "img", "script", "option", "input", "textarea", "footer"].some(
-                                    (tag) => tag === child.localName
-                                ) && 
-                                child.className !== "textToLink" &&
-                                child.textContent.length < textLength
-                            ) {
-                                let text = child.textContent,
-                                    result = url_regexp_g.test(text);
-                                if (result) {
-                                    span = $("<span class='textToLink'></span>");
-                                    span.html(
-                                        text.replace(url_regexp_g, function ($1) {
-                                            count++;
-                                            if ($1.includes("@") && !$1.match(/^https?:\/\/|\/@?/)) return `<a href="mailto:${$1}">${$1}</a>`;
-                                            return $1.startsWith("http")
-                                                ? `<a href="${$1}" target="_blank">${$1}</a>`
-                                                : $1.includes("magnet") || $1.includes("ed2k")
-                                                ? `<a href="${$1}" title="使用BT软件下载">${$1}</a>`
-                                                : /^thunder:\/\//i.test($1)
-                                                ? `<a href="${$1}" title="使用迅雷下载">${$1}</a>`
-                                                : `<a href="https://${$1}" target="_blank">${$1}</a>`;
-                                        })
-                                    );
-                                    $(child).replaceWith(span);
-                                }
-                            }
-                        }
-                    if (count) t.increase();
-                    return count == 1 && span && span.children()[0];
-                }
-            }
 
             function text2Link(node) {
                 if (node.nodeValue.length < textLength) {
                     let text = node.nodeValue,
                         result = url_regexp_g.test(text),
                         span = null,
-                        count = 0;
+                        count = 0,
+                        isMail = false;
                     if (result) {
                         span = $("<span class='text2Link'></span>");
                         span.html(
                             text.replace(url_regexp_g, function ($1) {
                                 count++;
-                                if ($1.includes("@") && !$1.match(/^https?:\/\/|\/@?/)) return `<a href="mailto:${$1}">${$1}</a>`;
+                                if ($1.includes("@") && !$1.match(/^https?:\/\/|\/@?|^magnet:/)) return (isMail = true, `<a href="mailto:${$1}">${$1}</a>`);
                                 return $1.startsWith("http")
                                     ? `<a href="${$1}" target="_blank">${$1}</a>`
                                     : $1.includes("magnet") || $1.includes("ed2k")
@@ -1395,7 +1367,8 @@ $(function () {
                                     : `<a href="https://${$1}" target="_blank">${$1}</a>`;
                             })/*.replace(/点/g, '.')*/
                         );
-                        $(node).replaceWith(span);
+                        if (isMail) $(node).replaceWith(span.html());
+                        else $(node).replaceWith(span);
                     }
                     
                     if (!result) {
@@ -1413,7 +1386,7 @@ $(function () {
                     }
                     
                     if (count) t.increase();
-                    return count == 1 && span && span.children()[0];
+                    return !isMail && count == 1 && span && span.children()[0];
                 }
             }
 
@@ -1430,6 +1403,7 @@ $(function () {
                     "www.imaybes.cc/wl?url=",
                     "iphone.myzaker.com/zaker/link.php?pk=",
                     "www.qiuziyuan.net/e/DownSys/DownSoft/?classid=",
+                    "www.yijingying.com/go.php?url=",
                 ],
                     linkTextPrefixes = t.get("linkTextPrefixes", []);
                 return keywords.some((k) => a.href.includes(k)) || linkTextPrefixes.some((k) => a.href.includes(k));
@@ -1460,12 +1434,14 @@ $(function () {
                 "www.iconfont.cn",
                 "www.kdocs.cn",
                 "help.aliyun.com",
-                "cn.bing.com",
                 "service.weibo.com",
                 "zhannei.baidu.com",
                 "pc.woozooo.com",
                 "play.google.com",
                 "nimg.ws.126.net",
+                "iapk.cc",
+                "www.microsofttranslator.com",
+                "whois.chinaz.com",
             ];
             
             t.update('excludeSites', excludeSites);
@@ -1508,12 +1484,6 @@ $(function () {
                     }
                 }
                 
-                // 移除链接末尾的&z和%26z/
-                if (/htm_(data|mob)\/\d+\/\d+\/\d+\.html|cl.\d+[xyz].xyz\/\w+\.php.*/.test(locHref)) {
-                    a.href = a.href.replace('https://to.redircdn.com/?', '').replace(/(?:%26|&)z\/?$|%26%23160%3B$/i, '').replace(/______/g, '.');
-                    return true;
-                }
-                
                 // 语雀
                 if (locHost === "www.yuque.com" && a.search.includes('fileGuid=')) {
                     t.title(a, '【净化】');
@@ -1530,7 +1500,7 @@ $(function () {
                     }
                 }
 
-                let reg = new RegExp('^((?:http|https|\\/|\\%2F)(?:.*?[?&].+?=|.*?[?&]))' + url_re_str, "i"),
+                let reg = new RegExp('^((?:http|https|\\/|\\%2F)(?:.*?[?&].+?=|.*?[?&]))(' + url_re_str + ")", "i"),
                     result = reg.exec(decodeURIComponent(a.href));
                 if (result) {
                     let temp = decodeURIComponent(
@@ -1621,9 +1591,10 @@ $(function () {
                                 a.className.includes(r)
                             ) ||
                             a.href == location.origin + "/" ||
+                            /^#.+/.test(a.attributes.href && a.attributes.href.nodeValue) ||
                             a.href.endsWith(".user.js"),
                         relative = t.get("relative", false);
-                    if (!relative)
+                    if (!relative && locHost !== "www.amazon.com")
                         result =
                             result ||
                             !/^(?:https?|\/\/).+/.test(
