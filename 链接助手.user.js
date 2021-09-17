@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.6
+// @version         1.9.7
 // @author          一个北七
 // @run-at          document-body
 // @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -208,16 +208,22 @@ $(function () {
         },
     };
 
-    let url_re_str = "(?<![.@])\\w(?:[\\w._-])+@\\w[\\w\\._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke)|(?:https?:\\/\\/|www\\.)[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@]+|(?<!@)(?:\\w[\\w._-]+\\.(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke))(?:\\/[\\w_\\-\\.~\\/\\=\\?&#%\\+:!*@\\u4e00-\\u9fa5]*)?",
-        base64_re_str = "([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)(?![A-Za-z0-9+/])",
-        url_regexp = new RegExp("\\b(" + url_re_str +
-                            "|" +
-                            "ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/" + 
-                            "|" +
-                            "magnet:\\?xt=urn:btih:\\w{40}(&[\\w\\s]+)?" +
-                            "|" +
-                            "thunder:\\/\\/" + base64_re_str +
-                            ")", "i");
+    let host_suffix = "(?:com|cn|org|net|info|tv|cc|gov|edu|nz|me|io|ke|im|top|xyz|app|moe|in|pw|one|co|ml|art|vip|cam|fun)",
+        http_re_str = "(?:https?:\\/\\/|www\\.)[-\\w_.~/=?&#%+:!*@]+|(?<!@)(?:\\w[-\\w._]+\\." + host_suffix + ")(?:\\/[-\\w_.~/=?&#%+:!*@\\u4e00-\\u9fa5]*)?",
+        bdpan_re_str = "(?:\\/?s)?\\/[-\\w_]{23}|(?:\\/?s)?\\/\\w{6,8}",
+        email_re_str = "(?<![.@])\\w(?:[-\\w._])+@\\w[-\\w._]+\\." + host_suffix,
+        ed2k_re_str = "ed2k:\\/\\/\\|file\\|[^\\|]+\\|\\d+\\|\\w{32}\\|(?:h=\\w{32}\\|)?\\/",
+        magnet_re_str = "((?:magnet:\\?xt=urn:btih:)?\\w{40}|magnet:\\?xt=urn:btih:\\w{32})",
+        magnet_suffix = "(?:&[\\S]+)?",
+        base64_re_str = "(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)",
+        thunder_re_str = "thunder:\\/\\/" + base64_re_str,
+        url_regexp = new RegExp("\\b" + ed2k_re_str +
+                            "|" + email_re_str +
+                            "|" + http_re_str +
+                            "|" + thunder_re_str +
+                            (locHost === "tieba.baidu.com" ? ("|" + bdpan_re_str ) : "") +
+                            "|" + magnet_re_str + magnet_suffix
+                            , "i");
     
     let Preprocess = {
         "www.mikuclub.xyz": function () {
@@ -409,12 +415,12 @@ $(function () {
                 noNotice: true,
             },
 
-            "ct.ghpym.com": {
-                // 果核城通网盘
+            "ctfile.com": {
+                // 城通网盘
                 inputSelector: "#passcode",
                 buttonSelector: "button.btn-primary",
                 regStr: "[a-z\\d]{4,6}",
-                timeout: 500, // >=125
+                timeout: 500,
             },
             
             "www.90pan.com": {
@@ -601,9 +607,9 @@ $(function () {
             return host
                 .replace(/^yun.baidu.com/, 'pan.baidu.com')
                 .replace(/.*lanzou[isx]?.com/, 'lanzou.com')
-                .replace(/^(?:[a-z]\d{3}|\d{3}[a-z])\.com$/, 'ct.ghpym.com')
-                .replace('dl.sixyin.com', 'ct.ghpym.com')
-                .replace('ct.bsh.me', 'ct.ghpym.com')
+                .replace(/^(?:[a-z]\d{3}|\d{3}[a-z]|t00y|\w+\.ctfile)\.com$/, 'ctfile.com')
+                .replace(/^ct\.\w+\.(?:com|me|org)$/, 'ctfile.com')
+                .replace('dl.sixyin.com', 'ctfile.com')
                 .replace(/quqi\.\w+\.com/, 'quqi.com')
                 .replace('feixin.10086.cn', '139.com')
                 .replace('ws28.cn', 'www.wenshushu.cn')
@@ -1067,10 +1073,10 @@ $(function () {
             if (locHost.includes("blog.csdn.net"))
                 document.body.addEventListener("click", function (obj) {
                     let e = obj.target;
-                    if (e.localName === "a" && e.href && e.href.match(url_re_str)) {
+                    if (e.localName === "a" && e.href && e.href.match(http_re_str)) {
 						if (e.id !== "btn-readmore-zk" && !(e.attributes.href && e.attributes.href.nodeValue.startsWith("#"))) {
 							obj.stopImmediatePropagation();
-							if (e.host !== "github.com") window.open(e.href);
+							if (e.host !== "github.com") window.open(e.href.replace(/\?utm_source=csdn_blog$/, ""));
 							obj.preventDefault();
 						}
                     }
@@ -1138,6 +1144,15 @@ $(function () {
 
                 if (e && e.localName === "a" && e.href) {
                     let a = e, isPrevent = false;
+                    if (/^magnet:\?xt=urn:btih:|^ed2k:\/\/\|file\||^thunder:\/\//i.test(a.href)) {
+                        $(a).removeAttr('target');
+                        if (isTextToLink) a.click();
+                        return;
+                    }
+                    
+                    if (a.host === "pan.baidu.com" && a.hash.startsWith("#/transfer/send?surl="))
+                        return;
+
                     if (locHref.includes("mod.3dmgame.com/mod/"))
                         a.search = "3dmgame.com";
                                     
@@ -1160,15 +1175,16 @@ $(function () {
                         t.open(a.href);
                     }
                     
-                    if (locHost !== "blog.csdn.net" && !cleanRedirectLink(a)) {
-						let text = a.innerText.trim();
-                        if (RegExp("^" + url_re_str + "$", "i").test(text)) {
+                    let pan = YunDisk.sites[YunDisk.mapHost(a.host)];
+                    if (!pan && locHost !== "blog.csdn.net" && !cleanRedirectLink(a)) {
+						let text = a.innerText.trim().replace(/…$/, "");
+                        if (RegExp("^(" + http_re_str + ")$").test(text)) {
                             if (isLinkText(a)) {
                                 t.title(a, '【替换】');
                                 a.href = t.http(text, true);
                                 t.increase();
                             } else if (locHost == "twitter.com" && a.host == "t.co")
-                                a.href = t.http(text.replace(/…$/, ""), true);
+                                a.href = t.http(text, true);
                             else if (!isTextToLink && !a.parentElement.className.includes('text2Link') && locHost != 'www.facebook.com' && a.host != 'download.downsx.org' && isDifferent(a)) {
                                 a.onclick = function() { return false; };
                                 isPrevent = true;
@@ -1266,12 +1282,12 @@ $(function () {
 						}
 					}
                     
-                    let pan = YunDisk.sites[YunDisk.mapHost(a.host)];
+                    pan = YunDisk.sites[YunDisk.mapHost(a.host)];
                     if (pan) YunDisk.addCode(a);
                     
                     if (isTextToLink) {
                         let isClicked = false;
-                        if (pan || t.get("autoClickSites", []).concat(YunDisk.pans).some(h => h == a.host) || /^magnet:\?xt=urn:btih:|^ed2k:\/\/\|file\||^thunder:\/\//i.test(a.href)) {
+                        if (pan || t.get("autoClickSites", []).concat(YunDisk.pans).some(h => h == a.host)) {
                             a.click();
                             isClicked = true;
                         }
@@ -1282,7 +1298,7 @@ $(function () {
                         }
                     }
                     
-                    if (/^magnet:\?xt=urn:btih:|^ed2k:\/\/\|file\||^thunder:\/\/|^https?:\/\/www\.nruan\.com\/(page\/\d+)?/i.test(a.href))
+                    if (/^https?:\/\/www\.nruan\.com\/(page\/\d+)?/i.test(a.href))
                         $(a).removeAttr('target');
                     
                     add_blank(a);
@@ -1346,47 +1362,48 @@ $(function () {
             let url_regexp_g = new RegExp(url_regexp, "ig");
 
             function text2Link(node) {
-                if (node.nodeValue.length < textLength) {
-                    let text = node.nodeValue,
-                        result = url_regexp_g.test(text),
+                let text = node.nodeValue;
+                if (!["115://", "aliyunpan://", "tg://", "ss://", "ssr://", "vmess://", "trojan://", "bdpan://", "BDLINK", "SHA1", "SHA256"].some(p => text.includes(p)) && text.length < textLength) {
+                    let parent = null;
+                    if (locHost === "tieba.baidu.com") {
+                        if ((node.parentElement.localName === "div" && node.parentElement.id.match(/^post_content_\d+$/)) ||
+                           (node.parentElement.localName === "span" && node.parentElement.className === "lzl_content_main")) {
+                            text = node.parentElement.innerText.replace(/\n/g, "<br>");
+                            parent = node.parentElement;
+                        }
+                    }
+
+                    let result = url_regexp_g.test(text),
                         span = null,
                         count = 0,
                         isMail = false;
                     if (result) {
                         span = $("<span class='text2Link'></span>");
                         span.html(
-                            text.replace(url_regexp_g, function ($1) {
+                            text.replace(url_regexp_g, function ($1, $2) {
                                 count++;
-                                if ($1.includes("@") && !$1.match(/^https?:\/\/|\/@?|^magnet:/)) return (isMail = true, `<a href="mailto:${$1}">${$1}</a>`);
+                                if ($1.includes("@") && !$1.match(/^https?:\/\/|\/@?|^magnet:/))
+                                    return (isMail = true, `<a class="text2Link" href="mailto:${$1}">${$1}</a>`);
                                 return $1.startsWith("http")
-                                    ? `<a href="${$1}" target="_blank">${$1}</a>`
-                                    : $1.includes("magnet") || $1.includes("ed2k")
-                                    ? `<a href="${$1}" title="使用BT软件下载">${$1}</a>`
-                                    : /^thunder:\/\//i.test($1)
-                                    ? `<a href="${$1}" title="使用迅雷下载">${$1}</a>`
-                                    : `<a href="https://${$1}" target="_blank">${$1}</a>`;
+                                       ? `<a href="${$1}" target="_blank">${$1}</a>`
+                                       : /^thunder:\/\//i.test($1)
+                                       ? `<a href="${$1}" title="使用迅雷下载">${$1}</a>`
+                                       : $1.includes("ed2k")
+                                       ? `<a href="${$1}" title="使用BT软件下载">${$1}</a>`
+                                       : $1.match(magnet_re_str)
+                                       ? `<a href="magnet:?xt=urn:btih:${$1.replace("magnet:?xt=urn:btih:", "").includes("&tr=") ? $1 : $2}" title="使用BT软件下载">${$1}</a>`
+                                       : /^(?:\/?s)?\/[\w\-_]{23}$|^(?:\/?s)?\/\w{7,8}$/.test($1)
+                                       ? `<a href="https://pan.baidu.com/s/${$1.replace(/^(?:\/?s)?\//, "")}" target="_blank">${$1}</a>`
+                                       : `<a href="https://${$1}" target="_blank">${$1}</a>`;
                             })/*.replace(/点/g, '.')*/
                         );
-                        if (isMail) $(node).replaceWith(span.html());
+                        if (parent) $(parent).html(span);
+                        else if (isMail) $(node).replaceWith(span.html());
                         else $(node).replaceWith(span);
                     }
                     
-                    if (!result) {
-                        result = /\b\w{40}\b/i.exec(text);
-                        if (result) {
-                            span = $("<span class='text2Link'></span>");
-                            span.html(
-                                text.replace(/\w{40}/i, function ($1) {
-                                        count++;
-                                        return `<a href="magnet:?xt=urn:btih:${$1}" title="使用BT软件下载">${$1}</a>`;
-                                    })
-                            );
-                            $(node).replaceWith(span);
-                        }
-                    }
-                    
                     if (count) t.increase();
-                    return !isMail && count == 1 && span && span.children()[0];
+                    return !isMail && count == 1 && span && span.children("a")[0];
                 }
             }
 
@@ -1414,7 +1431,7 @@ $(function () {
                     let hash = a.hash, search = a.search, password = t.search(a);
                     a.hash = "";
                     if (password) a.search = "";
-                    let text = decodeURIComponent(a.innerText).toLowerCase().replace(/^https?:\/\/|\/$/, '').replace(hash, ''),
+                    let text = decodeURIComponent(a.innerText.trim()).toLowerCase().replace(/^https?:\/\/|\/$/, '').replace(hash, ''),
                         href = decodeURIComponent(a.href).toLowerCase().replace(/^https?:\/\/|\/$/, '');
                     a.hash = hash;
                     if (password) a.search = search;
@@ -1500,7 +1517,7 @@ $(function () {
                     }
                 }
 
-                let reg = new RegExp('^((?:http|https|\\/|\\%2F)(?:.*?[?&].+?=|.*?[?&]))(' + url_re_str + ")", "i"),
+                let reg = new RegExp('^((?:http|https|\\/|\\%2F)(?:.*?[?&].+?=|.*?[?&]))(' + http_re_str + ")", "i"),
                     result = reg.exec(decodeURIComponent(a.href));
                 if (result) {
                     let temp = decodeURIComponent(
