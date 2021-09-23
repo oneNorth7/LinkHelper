@@ -1,5 +1,10 @@
 # 更新历史
 
+* V1.9.5 - 优化CSDN去除链接重定向功能；优化文本转链接功能；修复链接直达输入框样式问题（from **[超新星燃烧小行星带](https://greasyfork.org/zh-CN/scripts/422773-链接助手/discussions/93044)** & **[胡萝卜周](https://greasyfork.org/zh-CN/scripts/422773-%E9%93%BE%E6%8E%A5%E5%8A%A9%E6%89%8B/discussions/93793)**）；优化自动填写密码功能
+* V1.9.4 - 新增天翼小站分享帖预处理功能；新增QQ非官方页面、腾讯文档、Zaker、哔哩哔哩游戏、站长之家跳转页面自动跳转功能
+* V1.9.3 - 更换天眼查跳转页面选择器；优化网盘密码匹配规则（from **[超新星燃烧小行星带](https://greasyfork.org/zh-CN/scripts/422773-链接助手/discussions/92649)**）；修复`Chrome`全选复制问题（from **[打神](https://greasyfork.org/zh-CN/scripts/422773-%E9%93%BE%E6%8E%A5%E5%8A%A9%E6%89%8B/discussions/92630)**）；优化自动搜索添加密码功能；新增阿里云盘密码添加错误时提示用户反馈
+* V1.9.2 - 新增百度知道百度云分享预处理功能（from **[超新星燃烧小行星带](https://greasyfork.org/zh-CN/scripts/422773-链接助手/discussions/92549)**）；优化Mozilla开发者自动切换中文功能；新增随机切换Github镜像站功能
+* V1.9.1 - 更新书签地球选择器；新增新浪绿色上网页面自动跳转（from **[超新星燃烧小行星带](https://greasyfork.org/zh-CN/scripts/422773-链接助手/discussions/92449)**）；新增智软酷下载页面预处理功能
 * V1.9.0 - 优化阿里云盘自动填写密码功能；新增点击Github链接询问是否转`fastgit`镜像链接功能
 * V1.8.9 - 优化阿里云盘自动填写密码功能；新增蓝鲨下载页面网盘密码预处理功能
 * V1.8.8 - 新增百度贴吧跳转页面自动跳转；优化阿里云盘自动填写密码功能，解决浏览器兼容问题；优化网盘密码搜索规则（针对阿里云盘，往前搜索密码）

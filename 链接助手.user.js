@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.8
+// @version         1.9.9
 // @author          一个北七
 // @run-at          document-body
 // @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -56,7 +56,7 @@ $(function () {
         },
         
         clog() {
-            console.group('[链接助手]');
+            console.group("[链接助手]");
             if (locHost === "cloud.189.cn" || locHost === "pan.xunlei.com")
                 console.log = console.dir;
 
@@ -96,7 +96,7 @@ $(function () {
                 : (s ? "https://" : "http://") + link;
         },
         
-        title(a, mark='') {
+        title(a, mark="") {
             if (a.title)
                 a.title += "\n" + mark + decodeURIComponent(a.href);
             else a.title = mark + decodeURIComponent(a.href);
@@ -106,13 +106,13 @@ $(function () {
             return l.hash.slice(1);
         },
         
-        search(l=location, p = 'password') {
-            let args = l.search.slice(1).split('&');
+        search(l=location, p = "password") {
+            let args = l.search.slice(1).split("&");
             for (let a of args) {
-                if (a.includes(p + '='))
-                    return a.replace(p + '=', '');
+                if (a.includes(p + "="))
+                    return a.replace(p + "=", "");
             }
-            return '';
+            return "";
         },
 
         clean(src, str) {
@@ -135,12 +135,12 @@ $(function () {
             let option = {
                         toast: true,
                         showCancelButton: true,
-                        position: 'center',
+                        position: "center",
                         title,
-                        confirmButtonText: '是',
-                        cancelButtonText: '否',
+                        confirmButtonText: "是",
+                        cancelButtonText: "否",
                         showDenyButton: deny,
-                        denyButtonText: '取消',
+                        denyButtonText: "取消",
                     };
             return Swal.fire(option).then((res) => {
                 if (res.isConfirmed) yes();
@@ -155,7 +155,7 @@ $(function () {
         },
 
         subscribe() {
-            let isFollowed = t.get('isFollowed', false), least_times = t.get('least_times', 30);
+            let isFollowed = t.get("isFollowed", false), least_times = t.get("least_times", 30);
             success_times = +this.get("success_times");
             if (success_times > least_times && !isFollowed) {
                 Swal.fire({
@@ -165,38 +165,49 @@ $(function () {
                     )[0],
                           showCancelButton: true,
                           allowOutsideClick: false,
-                          confirmButtonColor: '#d33',
-                          confirmButtonText: '\u5df2\u5173\u6ce8\uff0c\u4e0d\u518d\u63d0\u9192\uff01',
-                          cancelButtonColor: '#3085d6',
-                          cancelButtonText: '\u7a0d\u540e\u5173\u6ce8',
+                          confirmButtonColor: "#d33",
+                          confirmButtonText: "\u5df2\u5173\u6ce8\uff0c\u4e0d\u518d\u63d0\u9192\uff01",
+                          cancelButtonColor: "#3085d6",
+                          cancelButtonText: "\u7a0d\u540e\u5173\u6ce8",
                         }).then((result) => {
                           if (result.isConfirmed) {
                             Swal.fire({
-                              position: 'center',
-                              icon: 'success',
-                              title: '\u611f\u8c22\u5173\u6ce8\uff01\uff01\uff01',
-                              text: '\u4e00\u4e2a\u5317\u4e03\u4f1a\u7ee7\u7eed\u4e0d\u9057\u4f59\u529b\u5730\u521b\u4f5c\u66f4\u591a\u5b9e\u7528\u5de5\u5177',
+                              position: "center",
+                              icon: "success",
+                              title: "\u611f\u8c22\u5173\u6ce8\uff01\uff01\uff01",
+                              text: "\u4e00\u4e2a\u5317\u4e03\u4f1a\u7ee7\u7eed\u4e0d\u9057\u4f59\u529b\u5730\u521b\u4f5c\u66f4\u591a\u5b9e\u7528\u5de5\u5177",
                               showConfirmButton: false,
                               timer: 2000
                             });
-                            t.set('isFollowed', true);
-                          } else t.set('least_times', least_times + 30);
+                            t.set("isFollowed", true);
+                          } else t.set("least_times", least_times + 30);
                         });
             }
         },
         
         update(name, value) {
-            if (this.get('updated_version', '') != scriptInfo.version) {
+            if (this.get("updated_version", "") != scriptInfo.version) {
                 let data = this.get(name, false);
                 if (data) {
-                    for (let v of value) {
-                        if (!data.some(d => d == v)) {
-                            data.push(v);
-                        }
-                    }
-                    this.set(name, data);
+                    value.push("uniportal.huawei.com", "cn.bing.com");
+                    let temp = data.filter(h => !value.includes(h));
+                    if (temp.length) 
+                        this.set(name, temp);
                 }
-                this.set('updated_version', scriptInfo.version);
+
+                this.rename("excludeSites", "excludeHosts");
+                this.rename("autoClickSites", "autoClickHosts");
+                this.set("updated_version", scriptInfo.version);
+            }
+        },
+
+        rename(name, newName) {
+            if (this.get("updated_version", "") != scriptInfo.version) {
+                let data = this.get(name, false);
+                if (data) {
+                    this.set(newName, data);
+                    this.delete(name);
+                }
             }
         },
         
@@ -227,7 +238,7 @@ $(function () {
     
     let Preprocess = {
         "www.mikuclub.xyz": function () {
-            if (/https:\/\/www\.mikuclub\.xyz\/\d+/.test(locHref)) {
+            if (/\/\d+/.test(locPath)) {
                 let password = $(".password1"),
                     link = $("a.download");
                 if (password.length && link.length)
@@ -235,31 +246,8 @@ $(function () {
             }
         },
 
-        "www.acggw.com": function () {
-            if (/https:\/\/www\.acggw\.com\/\d+\.html/.test(locHref)) {
-                let paragraphs = $(".single-content>p"),
-                    weiyun = null,
-                    mega = null;
-                for (let p of paragraphs) {
-                    let text = $(p).text();
-                    if (text.startsWith("链接：")) weiyun = $(p);
-                    if (weiyun && text.startsWith("密码："))
-                        weiyun.text(
-                            weiyun.text() + "#" + text.replace("密码：", "")
-                        );
-                    if (mega && text.startsWith("国外M盘："))
-                        mega.text(
-                            mega.text() + "#" + text.replace("国外M盘：", "")
-                        );
-                    if (text.startsWith("国外M盘：http")) mega = $(p);
-                }
-            }
-        },
-
         "www.olecn.com": function () {
-            if (
-                /http:\/\/www\.olecn\.com\/download\.php\?id=\d+/.test(locHref)
-            ) {
+            if (/http:\/\/www\.olecn\.com\/download\.php\?id=\d+/.test(locHref)) {
                 let link = $("div.panel-body a"),
                     pass = $("div.plus_l li:eq(3)");
                 if (link.length && pass.length)
@@ -271,16 +259,12 @@ $(function () {
         },
         
         "www.qiuziyuan.net": function () {
-            if (
-                /https:\/\/www\.qiuziyuan\.net\/(?:pcrj\/|Android\/\d+\.html)/.test(
-                    locHref
-                )
-            ) {
+            if (/\/(?:pcrj\/|Android\/\d+\.html)/.test(locPath)) {
                 let filetit = $("div.filetit:first");
                 for (let child of filetit.children()) {
                     if (child.href) {
-                        let result = url_regexp.exec(child.innerHTML);
-                        if (result) child.href = t.http(result[1]);
+                        let result = child.innerHTML.match(http_re_str);
+                        if (result) child.href = t.http(result[0]);
                     }
 
                     if (
@@ -295,13 +279,25 @@ $(function () {
             }
         },
 
+        "www.appmiu.com": function () {
+            if (/https:\/\/www\.appmiu\.com\/download\/\?post_id=/.test(locHref)) {
+                setTimeout(() => {
+                    let code = $("#tq").attr("data-clipboard-text");
+                    if (code) {
+                        let a = $("a.empty.button"), url = a.prop("href");
+                        if (url) a.prop("href", url + "#" + code);
+                    }
+                }, 1000);
+            }
+        },
+
         "www.acgjc.com": function () {
             if (/http:\/\/www.acgjc.com\/storage-download\/\?code=/.test(locHref)) {
-                let codeNode = $('#theme_custom_storage-0-download-pwd');
+                let codeNode = $("#theme_custom_storage-0-download-pwd");
                 if (codeNode.length) {
                     let code = codeNode.val(),
-                        link = codeNode.parents('div.fieldset-content').find('a');
-                    if (link) link.prop('href', link[0].href + '#' + code);
+                        link = codeNode.parents("div.fieldset-content").find("a");
+                    if (link) link.prop("href", link[0].href + "#" + code);
                 }
             }
         },
@@ -323,9 +319,28 @@ $(function () {
                 $("div.card-signup").css("margin-bottom", "20px");
             }
         },
+
+        "www.yxssp.com": function () {
+            if (/https:\/\/www\.yxssp\.com\/download\.php\?author=/.test(locHref)) {
+                $("ul.list-group:last").find("a").each((i, a) => {
+                    let text = $(a).text(),
+                        codeNode = $(a).parents("ul.list-group").find(`span.item-title:contains("${text}"):last`);
+
+                    if (codeNode[0].nextSibling) codeNode = codeNode[0].nextSibling;
+                    let result = /[.\w]{2,13}/.exec($(codeNode).text());
+
+                    if (a.search === "?%3E") a.search = "";
+                    
+                    if (result) a.hash = result[0];
+                });
+                
+                $(".card div.text-center, footer.blockquote-footer").hide();
+                $("div.card-signup").css("margin-bottom", "20px");
+            }
+        },
         
         "www.zhiruanku.com": function () {
-            if (/https:\/\/www\.zhiruanku\.com\/\d+/.test(locHref)) {
+            if (/\/\d+/.test(locPath)) {
                 $("div.wp-block-zibllblock-buttons a").each((i, a) => {
                     a.href = a.dataset.id
                     let result = a.textContent.match(":(\\w{2,10})");
@@ -335,7 +350,7 @@ $(function () {
         },
         
         "zhidao.baidu.com": function () {
-            if (/https:\/\/zhidao\.baidu\.com\/question\/\d+\.html.*/.test(locHref)) {
+            if (/\/question\/\d+\.html.*/.test(locPath)) {
                 $("baiduyun.ikqb-yun-box").each((i, e) => {
                     let title = $(e).attr("data_title"),
                         url = $(e).attr("data_sharelink") + "#" + $(e).attr("data_code"),
@@ -346,10 +361,12 @@ $(function () {
         },
         
         "yun.hei521.cn": function () {
-            let text = $("ol.comment-list .zface-box p:contains('码')").text();
-            if (!addCode(text)) {
-                text = $("div.post-content p:contains('码')").text();
-                addCode(text);
+            if (/\/index\.php\/archives\/\d+\.html/.test(locPath)) {
+                let text = $("ol.comment-list .zface-box p:contains('码')").text();
+                if (!addCode(text)) {
+                    text = $("div.post-content p:contains('码')").text();
+                    addCode(text);
+                }
             }
             
             function addCode(text) {
@@ -363,6 +380,25 @@ $(function () {
                         });
                         return true;
                     } 
+                }
+            }
+        },
+
+        "www.iapps.me": function () {
+            if (/\?download=\d+/.test(location.search)) {
+                let code = $("div.alert").text().match(/[a-z\d]{4}/g);
+                if (code)
+                    $("button.download-btn").attr("data-href", $("button.download-btn").attr("data-href") + "#" + code[0]);
+                
+                $("#carouselAdIndicators").parent().remove();
+            }
+            
+            if (/\/archives\/\d+/.test(locPath)) {
+                let func = $("#directDownload_2 .btn-primary").prop("onclick");
+                if (func) {
+                    let funcStr = func.toString(),
+                        result = funcStr.match(/open\("(.+)"\)/);
+                    if (result) $("div.getit>a").prop("href", result[1]).click(o => o.stopImmediatePropagation());
                 }
             }
         },
@@ -638,6 +674,7 @@ $(function () {
                 .replace(/^(?:[a-z]\d{3}|\d{3}[a-z]|t00y|\w+\.ctfile)\.com$/, 'ctfile.com')
                 .replace(/^ct\.\w+\.(?:com|me|org)$/, 'ctfile.com')
                 .replace('dl.sixyin.com', 'ctfile.com')
+                .replace('dw.yxssp.com', 'ctfile.com')
                 .replace(/quqi\.\w+\.com/, 'quqi.com')
                 .replace('feixin.10086.cn', '139.com')
                 .replace('ws28.cn', 'www.wenshushu.cn')
@@ -860,101 +897,99 @@ $(function () {
             sites: {
                 "show.bookmarkearth.com": {
                     // 书签地球
-                    include: "http://show.bookmarkearth.com/view/",
+                    include: "view/",
                     selector: "p.link",
                 },
 
                 "t.cn": {
                     // 新浪短链
-                    include: "http://t.cn/",
+                    include: "",
                     selector: "a.m-btn-orange",
                 },
 
                 "sunbox.cc": {
                     // 阳光盒子
-                    include:
-                        "https://sunbox.cc/wp-content/themes/begin/go.php?url=",
+                    include: "wp-content/themes/begin/go.php?url=",
                     selector: "a.alert-btn",
                 },
 
                 "www.itdaan.com": {
                     // 开发者知识库
-                    include: "https://www.itdaan.com/link/",
+                    include: "link/",
                     selector: "a.c-footer-a1",
                 },
 
                 "to.redircdn.com": {
-                    include:
-                        "https://to.redircdn.com/?action=image&url=",
+                    include: "?",
                     selector: "a.bglink",
                 },
                 
                 "link.csdn.net": {
                     // CSDN
-                    include: "https://link.csdn.net/?target=",
+                    include: "?target=",
                     selector: "a.loading-btn",
                     timeout: 100,
                 },
                 
                 "support.qq.com": {
 					// 兔小巢
-                    include: "support.qq.com/products/",
+                    match: "products\\/\\d+\\/link-jump\\?jump=",
                     selector: "span.link_url",
                 },
                 
                 "c.pc.qq.com": {
                     // QQ非官方页面
-                    include: "c.pc.qq.com/middlem.html?pfurl=",
+                    include: "middlem.html?pfurl=",
                     selector: "#url",
                 },
                 
                 "docs.qq.com": {
                     // 腾讯文档
-                    include: "docs.qq.com/scenario/link.html?url=",
+                    include: "scenario/link.html?url=",
                     selector: "span.url-src",
                     timeout: 500,
                 },
                 
                 "www.tianyancha.com": {
                     // 天眼查
-                    include: "www.tianyancha.com/security?target=",
+                    include: "security?target=",
                     selector: "div.security-link",
                 },
                 
                 "www.yuque.com": {
                     // 语雀
-                    include: "www.yuque.com/r/goto?url=",
+                    include: "r/goto?url=",
                     selector: "button.ant-btn-primary>a",
                     timeout: 300,
                 },
                 
                 "jump.bdimg.com": {
                     // 百度贴吧
-                    include: "jump.bdimg.com/safecheck/index?url=",
+                    include: "safecheck/index?url=",
                     selector: "div.warning_info.fl>a",
                 },
                 
                 "jump2.bdimg.com": {
                     // 百度贴吧
-                    include: "jump2.bdimg.com/safecheck/index?url=",
+                    include: "safecheck/index?url=",
                     selector: "div.warning_info.fl>a",
                 },
                 
                 "iphone.myzaker.com" : {
                     // Zaker
-                    include: "iphone.myzaker.com/zaker/link.php?",
+                    include: "zaker/link.php?",
                     selector: "a.btn",
                 },
                 
                 "game.bilibili.com": {
                     // 哔哩哔哩游戏
-                    include: "/linkfilter/?url=",
+                    include: "linkfilter/?url=",
                     selector: "#copy-url",
                 },
                 
                 "www.chinaz.com": {
                     // 站长之家
-                    include: "/go.shtml?url=",
+                    include: "go.shtml?url=",
                     selector: "div.link-bd__text",
                 },
 
@@ -1133,7 +1168,7 @@ $(function () {
             if (locHost === "developer.mozilla.org") RedirectPage.mozilla();
             else if (locHost === "docs.microsoft.com") RedirectPage.MSDocs();
             
-            let isChromium = navigator.appVersion.includes("Chrome");
+            let isChromium = navigator.userAgent.includes("Chrome");
             
             if (isChromium)
                 $(document).on("selectstart mousedown", (obj) => listener(obj));
@@ -1247,7 +1282,7 @@ $(function () {
                     
                     let pan = YunDisk.sites[YunDisk.mapHost(a.host)];
                     if (!pan && locHost !== "blog.csdn.net" && !cleanRedirectLink(a)) {
-						let text = a.innerText.trim().replace(/…$/, "");
+						let text = a.textContent.trim().replace(/…$/, "");
                         if (RegExp("^(" + http_re_str + ")$").test(text)) {
                             if (isLinkText(a)) {
                                 t.title(a, '【替换】');
@@ -1357,7 +1392,7 @@ $(function () {
                     
                     if (isTextToLink) {
                         let isClicked = false;
-                        if (pan || t.get("autoClickSites", []).concat(YunDisk.pans).some(h => h == a.host)) {
+                        if (pan || t.get("autoClickHosts", []).concat(YunDisk.pans).some(h => h == a.host)) {
                             a.click();
                             isClicked = true;
                         }
@@ -1384,12 +1419,12 @@ $(function () {
             t.registerMenu('添加自动跳转域名', addAutoClick);
             
             function addAutoClick() {
-                let autoClickSites = t.get("autoClickSites", []), input = prompt("输入的域名的链接文本转链接后会自动跳转", locHost);
+                let autoClickHosts = t.get("autoClickHosts", []), input = prompt("输入的域名的链接文本转链接后会自动跳转", locHost);
                 if (input) {
                     if (/[\w]+(\.[\w]+)+/.test(input)) {
-                        if (!autoClickSites.some((s) => s.includes(input))) {
-                            autoClickSites.push(input);
-                            t.set("autoClickSites", autoClickSites);
+                        if (!autoClickHosts.some((s) => s.includes(input))) {
+                            autoClickHosts.push(input);
+                            t.set("autoClickHosts", autoClickHosts);
                         } else t.showNotice(`域名 <${input}> 已存在!!!`);
                     } else t.showNotice(`<${input}> 不是有效域名!!!`);
                 }
@@ -1413,7 +1448,7 @@ $(function () {
                 );
             }
             
-            let textLength = t.get("textLength", 200);
+            let textLength = t.get("textLength", 500);
 
             // t.registerMenu(
             //     `设置文本字数限制(${textLength})`,
@@ -1478,18 +1513,9 @@ $(function () {
 
             function isLinkText(a) {
                 let keywords = [
-                    "niao.su/go",
-                    "www.sunweihu.com/go/?url=",
                     "jump.bdimg.com/safecheck/index?url=",
                     "jump2.bdimg.com/safecheck/index?url=",
-                    "zhouxiaoben.info/wp-content/themes/begin/go.php?url=",
-                    "www.423down.com/wp-content/plugins/momgo/go.php?url=",
-                    "www.423down.com/go.php?url=",
-                    "www.ccava.net/xc_url/?url=",
-                    "www.imaybes.cc/wl?url=",
                     "iphone.myzaker.com/zaker/link.php?pk=",
-                    "www.qiuziyuan.net/e/DownSys/DownSoft/?classid=",
-                    "www.yijingying.com/go.php?url=",
                 ],
                     linkTextPrefixes = t.get("linkTextPrefixes", []);
                 return keywords.some((k) => a.href.includes(k)) || linkTextPrefixes.some((k) => a.href.includes(k));
@@ -1509,7 +1535,7 @@ $(function () {
                 return false;
             }
 
-            let excludeSites = [
+            let excludes = [
                 "v.qq.com",
                 "v.youku.com",
                 "blog.csdn.net",
@@ -1528,22 +1554,27 @@ $(function () {
                 "iapk.cc",
                 "www.microsofttranslator.com",
                 "whois.chinaz.com",
+                "yandex.com",
+                "lixian.vip.xunlei.com",
+                "fanyi.baidu.com",
+                "lanjing.jd.com",
+                "api.",
             ];
             
-            t.update('excludeSites', excludeSites);
+            t.update("excludeSites", excludes);
             
-            excludeSites = t.get("excludeSites", excludeSites);
+            let excludeHosts = t.get("excludeHosts", []);
             
-            t.registerMenu("添加例外域名", addExcludeSite);
+            t.registerMenu("添加例外域名", addExcludeHost);
 
             // 添加例外域名
-            function addExcludeSite() {
+            function addExcludeHost() {
                 let input = prompt("输入的域名下的链接不会被净化: ", locHost);
                 if (input) {
                     if (/[\w]+(\.[\w]+)+/.test(input)) {
-                        if (!excludeSites.some((s) => s.includes(input))) {
-                            excludeSites.push(input);
-                            t.set("excludeSites", excludeSites);
+                        if (!excludeHosts.some((s) => s.includes(input))) {
+                            excludeHosts.push(input);
+                            t.set("excludeHosts", excludeHosts);
                         } else t.showNotice(`例外域名 <${input}> 已存在!!!`);
                     } else t.showNotice(`<${input}> 不是有效域名!!!`);
                 }
@@ -1551,8 +1582,8 @@ $(function () {
 
             function cleanRedirectLink(a) {
                 // 小众软件
-                if (locHost == 'www.appinn.com' && (a.search.includes('ref=appinn') || a.hash.includes('ref=appinn'))) {
-                    t.title(a, '【净化】');
+                if (locHost == "www.appinn.com" && (a.search.includes("ref=appinn") || a.hash.includes("ref=appinn"))) {
+                    t.title(a, "【净化】");
                     a.search = a.search.replace(/[?&]ref=appinn$/, '');
                     a.hash = a.hash.replace(/[#&]ref=appinn$/, '');
                     t.increase();
@@ -1560,20 +1591,20 @@ $(function () {
                 }
                 
                 // 净化跳转链接
-                let hosts = ['dalao.ru', 'niao.su', 'iao.su', 'nicelinks.site', 'www.appinn.com', 'support.qq.com', locHost];
+                let hosts = ["dalao.ru", "niao.su", "iao.su", "nicelinks.site", "www.appinn.com", "support.qq.com", locHost];
                 for (let h of hosts) {
                     let reg = RegExp(`\\?(?:utm_source=)?${h}$`), result = reg.exec(a.href);
                     if (result) {
-                        t.title(a, '【净化】');
-                        a.href = a.href.replace(result[0], '');
+                        t.title(a, "【净化】");
+                        a.href = a.href.replace(result[0], "");
                         t.increase();
                     }
                 }
                 
                 // 语雀
-                if (locHost === "www.yuque.com" && a.search.includes('fileGuid=')) {
-                    t.title(a, '【净化】');
-                    a.search = a.search.replace(/[?&]fileGuid=\w{16}$/, '');
+                if (locHost === "www.yuque.com" && a.search.includes("fileGuid=")) {
+                    t.title(a, "【净化】");
+                    a.search = a.search.replace(/[?&]fileGuid=\w{16}$/, "");
                     t.increase();
                     return true;
                 }
@@ -1581,46 +1612,53 @@ $(function () {
                 // 那些免费的砖
                 if (locHost === "www.thosefree.com") {
                     if (a.search.match("\\?from=thosefree\\.com")) {
-                        t.title(a, '【净化】');
-                        a.search = '';
+                        t.title(a, "【净化】");
+                        a.search = "";
                     }
                 }
+                if (!(["login", "logout", "signin", "signup", "signout", "auth", "oauth", "passport"].some(k => locHref.includes(k))
+                    || /登录|登入|登出|退出|注册|login|logout|signin|signup|signout/i.test(a.textContent)
+                    || excludeHosts.some((s) => a.host.includes(s)))
+                ) {
+                    let reg = new RegExp("^((?:http|https|\\/|\\%2F)(?:.*?[?&].+?=|.*?[?&]))(" + http_re_str + ")", "i"),
+                        result = reg.exec(decodeURIComponent(a.href));
+                    if (result) {
+                        let temp = decodeURIComponent(
+                            decodeURIComponent(result[2])
+                        ).replace(/https?:\/\//, "");
+                        if (!decodeURIComponent(locHref).replace(/https?:\/\//, "").includes(temp.split("&")[0])) {
+                            if (!/t\d+\.html/i.test(temp)) {
+                                let href = decodeURIComponent(
+                                    decodeURIComponent(
+                                        t.http(result[2])
+                                    )
+                                );
 
-                let reg = new RegExp('^((?:http|https|\\/|\\%2F)(?:.*?[?&].+?=|.*?[?&]))(' + http_re_str + ")", "i"),
-                    result = reg.exec(decodeURIComponent(a.href));
-                if (result) {
-                    let temp = decodeURIComponent(
-                        decodeURIComponent(result[2])
-                    ).replace(/https?:\/\//, '');
-                    if (
-                        !(
-                            decodeURIComponent(locHref).replace(/https?:\/\//, '').includes(
-                                temp.split("&")[0]
-                            ) || ['login', 'oauth'].some(k => locHref.includes(k)) || /登录|注册|log|sign/i.test(a.textContent) ||
-                            excludeSites.some((s) => result[1].includes(s)) ||
-                            YunDisk.sites[YunDisk.mapHost(a.host)]
-                        )
-                    ) {
-                        if (!/t\d+\.html/i.test(temp)) {
-                            let href = decodeURIComponent(
-                                decodeURIComponent(
-                                    t.http(result[2])
-                                )
-                            );
-
-                            t.title(a, '【净化】');
-                            if (["c.pc.qq.com","mail.qq.com", "m.sogou.com", "www.douban.com", "www.google.com", "txt.guoqiangti.ga", "g.luciaz.me"].some((h) => a.host == h))
-                                a.href = href.split("&")[0];
-                            else a.href = href.replace(/______/g, ".");
+                                t.title(a, "【净化】");
+                                if (["c.pc.qq.com","mail.qq.com", "m.sogou.com", "www.douban.com", "www.google.com", "txt.guoqiangti.ga", "g.luciaz.me"].some((h) => a.host == h))
+                                    a.href = href.split("&")[0];
+                                else a.href = href.replace(/______/g, ".");
+                            }
+                            t.increase();
+                            return true;
                         }
-                        t.increase();
-                        return true;
+                    } else {
+                        reg = new RegExp("((?:http|https|\\/|\\%2F)(?:.*[?&].+?=|.*[?&]|.*(?:go|goto|link)\\/))(" + base64_re_str + ")", "i");
+                        result = reg.exec(decodeURIComponent(a.href));
+                        if (result) {
+                            let temp = atob(result[2]);
+                            if (temp.match("^" + http_re_str + "$")) {
+                                t.title(a, '【Base64】');
+                                a.href = temp;
+                                t.increase();
+                                return true;
+                            }
+                        }
                     }
                 }
-
             }
 
-            let defaultTargetSites = t.get("defaultTargetSites", ['shuax.com', 'app.infinityfree.net']);
+            let defaultTargetSites = t.get("defaultTargetSites", []);
             let isAddBlank = t.get("isAddBlank", false);
             let isDefault = defaultTargetSites.some((s) => s == location.host);
             // 注册菜单项该站链接保持默认打开方式
@@ -1691,17 +1729,17 @@ $(function () {
             }
             
             // 添加链接直达输入框
-            let addDirectTo = t.get('addDirectTo', true);
+            let addDirectTo = t.get("addDirectTo", true);
             if (addDirectTo) add_direct();
             let menuID2 = t.registerMenu(`${addDirectTo ? "[✔]" : "[✖]"}显示链接直达输入框`, directToMenu);
             
             function directToMenu() {
                 addDirectTo = !addDirectTo;
-                t.set('addDirectTo', addDirectTo);
+                t.set("addDirectTo", addDirectTo);
                 t.unregisterMenu(menuID2);
                 menuID2 = t.registerMenu(`${addDirectTo ? "[✔]" : "[✖]"}显示链接直达输入框`, directToMenu);
                 if (addDirectTo) add_direct();
-                else if ($('#L_DirectTo').length) $('#L_DirectTo').remove();
+                else if ($("#L_DirectTo").length) $("#L_DirectTo").remove();
             }
             
             function add_direct() {
