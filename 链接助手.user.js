@@ -2,10 +2,10 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         1.9.9
+// @version         2.0.0
 // @author          一个北七
 // @run-at          document-body
-// @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 跳转页面自动跳转; 文本转链接; 净化跳转链接; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
+// @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 文本转链接; 移除链接重定向; 重定向页面自动跳转; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
 // @icon            https://gitee.com/oneNorth7/pics/raw/master/picgo/link-helper.png
 // @compatible      chrome 69+
 // @compatible      firefox 78+
@@ -184,7 +184,7 @@ $(function () {
                         });
             }
         },
-        
+
         update(name, value) {
             if (this.get("updated_version", "") != scriptInfo.version) {
                 let data = this.get(name, false);
@@ -449,7 +449,7 @@ $(function () {
                 // 蓝奏云
                 inputSelector: "#pwd",
                 buttonSelector: "#sub, .passwddiv-btn",
-                regStr: "[a-z\\d]{4,10}",
+                regStr: "[a-z\\d]{2,10}",
                 redirect: { host: { "lanzous": "lanzoux" } },
                 noNotice: true,
             },
@@ -739,7 +739,7 @@ $(function () {
                     }
                     
                     if (input.length) {
-                        if (site.store) code = t.get(host);
+                        if (site.store) code = t.get(host, false);
                         else if (site.password) code = decodeURIComponent(t.search()) || t.hashcode();
                         else code = t.hashcode();
                         if (code) {
@@ -826,65 +826,65 @@ $(function () {
                         a.search = "?path=%2F";
                 }
 
-				if (site.password) {
+                if (site.password) {
                     let result = a.hash.match("#(" + site.regStr + ")");
                     if (result) {
                         if (!t.search(a))
                                 a.search = a.search ? a.search + '&' + 'password=' + encodeURIComponent(result[1]) : 'password=' + encodeURIComponent(result[1]);
                         a.hash = "";
                     }
-				}
-				
-				if (!codeRe.test(t.hashcode(a)) && !codeRe.test(t.search(a))) {
-					let reg = new RegExp(
-							"\\s*(?:提[取示]|访问|查阅|取件|密\\s*|艾|Extracted-code|key|password|pwd)[码碼]?[】\\])）]?\\s*[\\u4e00-\\u9fa5]?[:： （(是为]?\\s*(" +
-								site.regStr +
-								")|^[码碼]?[】\\])）]?\\s*[:：【\\[ （(]*\\s*(" +
-								site.regStr +
-								")[】\\])）]?" + (isInput ? "\\b" : "$"),
-							"i"
-						),
-						code = reg.exec($(a).text().trim());
+                }
+                
+                if (!codeRe.test(t.hashcode(a)) && !codeRe.test(t.search(a))) {
+                    let reg = new RegExp(
+                            "\\s*(?:提[取示]|访问|查阅|取件|密\\s*|艾|Extracted-code|key|password|pwd)[码碼]?[】\\])）]?\\s*[\\u4e00-\\u9fa5]?[:： （(是为]?\\s*(" +
+                                site.regStr +
+                                ")|^[码碼]?[】\\])）]?\\s*[:：【\\[ （(]*\\s*(" +
+                                site.regStr +
+                                ")[】\\])）]?" + (isInput ? "\\b" : "$"),
+                            "i"
+                        ),
+                        code = reg.exec($(a).text().trim());
                     if (code && (/^http/.test(code[1]) || /^http/.test(code[2])))
                         code = null;
-					for (
-						let i = 10, current = a;
-						current && current.localName != "body" && !code && i > 0;
-						i--, current = current.parentElement
-					) {
-						if (locHost === "yun.hei521.cn" && current.id === "main")
+                    for (
+                        let i = 10, current = a;
+                        current && current.localName != "body" && !code && i > 0;
+                        i--, current = current.parentElement
+                    ) {
+                        if (locHost === "yun.hei521.cn" && current.id === "main")
                             break;
-						let next = current;
-						while (!code) {
-							if (!next) break;
+                        let next = current;
+                        while (!code) {
+                            if (!next) break;
                             else if (next.nodeValue) code = reg.exec(next.nodeValue.trim());
                             else if (!other.some(s => next.textContent.match(s)))
                                 code = reg.exec(next.innerText.trim());
 
                             if (code && (/^http/.test(code[1]) || /^http/.test(code[2])))
                             code = null;
-							
-							next = next.nextSibling;
-						}
-					}
+                            
+                            next = next.nextSibling;
+                        }
+                    }
 
-					if (code) {
-						let c = code[1] || code[2];
+                    if (code) {
+                        let c = code[1] || code[2];
                         a.href = a.href.replace(/%E6%8F%90%E5%8F%96%E7%A0%81$/, "");
-						if (site.store) t.set(mapped, c);
-						else if (site.password) {
-							if (!t.search(a))
-								a.search = a.search ? a.search + '&' + 'password=' + encodeURIComponent(c) : 'password=' + encodeURIComponent(c);
-						} else {
+                        if (site.store) t.set(mapped, c);
+                        else if (site.password) {
+                            if (!t.search(a))
+                                a.search = a.search ? a.search + '&' + 'password=' + encodeURIComponent(c) : 'password=' + encodeURIComponent(c);
+                        } else {
                             a.href = a.href.replace(/%23.*$/, "");
                             a.hash = c;
                         }
-					} else {
-						if (site.store) t.delete(mapped);
-						t.clog("找不到code!");
-					}
-				}
-			}
+                    } else {
+                        if (site.store) t.delete(mapped);
+                        t.clog("找不到code!");
+                    }
+                }
+            }
         },
     };
     let success_times = t.get("success_times");
@@ -932,7 +932,7 @@ $(function () {
                 },
                 
                 "support.qq.com": {
-					// 兔小巢
+                    // 兔小巢
                     match: "products\\/\\d+\\/link-jump\\?jump=",
                     selector: "span.link_url",
                 },
@@ -997,6 +997,42 @@ $(function () {
                     // 标志情报局
                     include: "?url=",
                     selector: "a.button",
+                },
+
+                "www.douban.com": {
+                    // 豆瓣
+                    include: "link2/?url=",
+                    selector: "a.btn-redir",
+                },
+                
+                "link.zhihu.com": {
+                    // 知乎
+                    include: "?target=",
+                    selector: "a.button",
+                },
+                
+                "www.jianshu.com": {
+                    // 简书
+                    include: "go-wild?ac=2&url=",
+                    selector: 'div[title^="http"], div[title^="www"]',
+                },
+                
+                "link.juejin.cn": {
+                    // 掘金
+                    include: "?target=",
+                    selector: 'p[style="margin: 0px;"]',
+                },
+                
+                "www.oschina.net": {
+                    // 开源中国
+                    include: "action/GoToLink?url=",
+                    selector: "a.link-button",
+                },
+                
+                "www.youtube.com": {
+                    // youtube
+                    include: "redirect?q=",
+                    selector: "#invalid-token-redirect-goto-site-button",
                 },
             },
 
@@ -1177,13 +1213,15 @@ $(function () {
             
             if (locHost.includes("blog.csdn.net"))
                 document.body.addEventListener("click", function (obj) {
-                    let e = obj.target;
-                    if (e.localName === "a" && e.href && e.href.match(http_re_str)) {
-						if (e.id !== "btn-readmore-zk" && !(e.attributes.href && e.attributes.href.nodeValue.startsWith("#"))) {
-							obj.stopImmediatePropagation();
-							if (e.host !== "github.com") window.open(e.href.replace(/\?utm_source=csdn_blog$/, ""));
-							obj.preventDefault();
-						}
+                    if (!t.get("excludeAll", false)) {
+                        let e = obj.target;
+                        if (e.localName === "a" && e.href && e.href.match(http_re_str)) {
+                            if (e.id !== "btn-readmore-zk" && !(e.attributes.href && e.attributes.href.nodeValue.startsWith("#"))) {
+                                obj.stopImmediatePropagation();
+                                if (e.host !== "github.com" && e.host !== "chrome.google.com") window.open(e.href.replace(/\?utm_source=csdn_blog$/, ""));
+                                obj.preventDefault();
+                            }
+                        }
                     }
                 }, true);
             
@@ -1200,6 +1238,430 @@ $(function () {
                 if (locPath === "/")
                     $("form div.d-flex, div.home-nav-hidden>a").remove();
             }
+
+            GM_addStyle(`
+                .swal2-popup {
+                    font-size: 1em;
+                    font: 16px/1.5 'Microsoft Yahei',arial,helvetica,sans-serif;
+                }
+
+                .swal2-content {
+                    padding: 0;
+                }
+                
+                .swal2-close {
+                    box-shadow: none;
+                }
+
+                .swal2-close:focus {
+                    box-shadow: none;
+                }
+
+
+                .lh-menu {
+                    margin: 0;
+                    padding: 0;
+                    list-style: none;
+                    font-size: 18px;
+                }
+
+                .lh-item {
+                    padding-top: 20px;
+                    margin-bottom: 0;
+                }
+
+                .lh-footer {
+                    font-size: 16px;
+                }
+
+                .lh-footer a {
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+
+                .lh-item label{
+                    font-weight: normal;
+                    display: inline-block;
+                    font-size: 18px;
+                }
+
+                .lh-item input {
+                    -webkit-appearance: auto !important;
+                    background: white;
+                    width: auto;
+                    height: auto;
+                    float: none;
+                    margin-bottom: 0;
+                    border: 1px solid #e2e2e2;
+                    font-size: 18px;
+                    padding: 0;
+                }
+
+                .lh-item input[type="range"] {
+                    display: inline-block;
+                }
+
+                .lh-item select {
+                    width: auto;
+                    border: 1px solid #e2e2e2;
+                    font-size: 16px;
+                    background-color: #f8f8f8;
+                    color: #aaaaaa;
+                    padding: 0 30px 0 2px;
+                    border-radius: 3px;
+                    height: 30px;
+                    line-height: 28px;
+                    outline: none;
+                    appearance: none;
+                    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAANCAYAAAC+ct6XAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RjBBRUQ1QTQ1QzkxMTFFMDlDNDdEQzgyNUE1RjI4MTEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RjBBRUQ1QTU1QzkxMTFFMDlDNDdEQzgyNUE1RjI4MTEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpGMEFFRDVBMjVDOTExMUUwOUM0N0RDODI1QTVGMjgxMSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpGMEFFRDVBMzVDOTExMUUwOUM0N0RDODI1QTVGMjgxMSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pk5mU4QAAACUSURBVHjaYmRgYJD6////MwY6AyaGAQIspCieM2cOjKkIxCFA3A0TSElJoZ3FUCANxAeAWA6IOYG4iR5BjWwpCDQCcSnNgxoIVJCDFwnwA/FHWlp8EIpHSKoGgiggLkITewrEcbQO6mVAbAbE+VD+a3IsJTc7FQAxDxD7AbEzEF+jR1DDywtoCr9DbhwzDlRZDRBgACYqHJO9bkklAAAAAElFTkSuQmCC);
+                    background-position: center right;
+                    background-repeat: no-repeat;
+                }
+
+                .lh-item button {
+                    border: 1px solid #e2e2e2;
+                    font-size: 16px;
+                    padding: 2px 5px;
+                    border-radius: 10px;
+                    color: #000;
+                    background-color: #f0f0f0;
+                }
+
+                .lh-item button:hover {
+                    background-color: #3e97eb;
+                    color: white;
+                }
+
+                @keyframes hover-color {
+                    from {
+                        border-color: #e2e2e2;
+                    }
+                    to {
+                        border-color: #3e97eb;
+                    } 
+                }
+
+                .lh-item input[type="checkbox"] {
+                    display: none;
+                    position: absolute;
+                }
+
+                .lh-item input[type="checkbox"]+span {
+                    position: relative;
+                    padding-left: 30px;
+                    cursor: pointer;
+                }
+
+                .lh-item input[type="checkbox"]+span:hover:before {
+                    animation-duration: 0.4s;
+                    animation-fill-mode: both;
+                    animation-name: hover-color;
+                }
+
+                .lh-item input[type="checkbox"]+span:before {
+                    position: absolute;
+                    top: 2px;
+                    left: 5px;
+                    display: inline-block;
+                    width: 20px;
+                    height: 20px;
+                    content: "";
+                    border: 1px solid #e2e2e2;
+                    border-radius: 3px;
+                }
+
+                .lh-item input[type="checkbox"]+span:after {
+                    position: absolute;
+                    display: none;
+                    content: "";
+                    top: 4px;
+                    left: 12px;
+                    box-sizing: border-box;
+                    width: 6px;
+                    height: 12px;
+                    transform: rotate(45deg);
+                    border-width: 2px;
+                    border-style: solid;
+                    border-color: #fff;
+                    border-top: 0;
+                    border-left: 0
+                }
+
+                .lh-item input[type="checkbox"]:checked+span:before {
+                    animation-name: none;
+                    border: #3e97eb;
+                    background: #3e97eb;
+                }
+
+                .lh-item input[type="checkbox"]:checked+span:after {
+                    display: block;
+                }
+            `);
+            
+            function showSettings() {
+                let html = `<ul class="lh-menu">
+                    <li class="lh-item">
+                        <label title="勾选此项可关闭移除链接重定向功能">
+                            <input type="checkbox" id="excludeAll" />
+                            <span style="color: red">*</span>
+                        </label>
+                        <label title="例外域名对应的链接不会被净化或替换, 误净化或误替换时可添加以不移除重定向">
+                            <input list="excludeHosts" id="excludeHost" placeholder="例外域名" />
+                        </label>
+                        <button id="addExcludeHost" title="添加例外域名">添加</button>
+                        <datalist id="excludeHosts"></datalist>
+                    </li>
+                    <li class="lh-item">
+                        <label title="默认500，步进50">
+                            文本转链接的字符数限制
+                            <br />
+                            <input type="range" id="limitText" min="200" max="800" step="50" />
+                            <br />
+                            <span>500</span>
+                        </label>
+                    </li>
+                    <li class="lh-item">
+                        <label title="勾选后所有文本转链接后自动打开">
+                            <input type="checkbox" id="autoClickAll" />
+                            <span style="color: red">*</span>
+                        </label>
+                        <label title="域名对应的文本转链接后自动打开">
+                            <input list="autoClickHosts" id="autoClickHost" placeholder="自动打开域名" />
+                        </label>
+                        <button id="addAutoClickHost" title="添加自动打开域名">添加</button>
+                        <datalist id="autoClickHosts"></datalist>
+                    </li>
+                    <li class="lh-item">
+                        <button type="button" id="autoClick" title="当前站点的文本转链接后自动打开">自动打开链接文本</button>
+                        <select id="autoClickSites" title="自动打开链接文本的站点" style="display: none"></select>
+                        <button id="removeAutoClick" title="删除文本转链接后自动打开的站点" style="display: none">删除</button>
+                    </li>
+                    <li class="lh-item">
+                        <label title="维基百科、谷歌开发者、谷歌商店、Github无法访问时请勾选此项">
+                            <input type="checkbox" id="jumpToMirror"/>
+                            <span>自动切换镜像</span>
+                        </label>
+                    </li>
+                    <li class="lh-item lh-target-blank">
+                        <label title="启用新标签打开链接功能">
+                            <input id="addBlank" type="checkbox" />
+                            <span>新标签打开链接</span>
+                        </label>
+                        &nbsp;&nbsp;&nbsp;
+                        <label title="新标签打开相对链接">
+                            <input id="relative" type="checkbox" />
+                            <span>相对链接</span>
+                        </label>
+                    </li>
+                    <li class="lh-item">
+                        <button type="button" id="defaultTarget" title="当前站点的链接保持默认打开方式，优先级最高，多用于文档教程类网站">保持链接默认打开方式</button>
+                        <select id="defaultTargetSites" title="链接保持默认打开方式的站点" style="display: none"></select>
+                        <button id="removeDefault" title="删除链接默认打开方式的站点" style="display: none">删除</button>
+                    </li>
+                </ul>`;
+
+                Swal.fire({
+                        title: '链接助手配置',
+                        html,
+                        footer: '<div class="lh-footer">前往<a href="https://github.com/oneNorth7/LinkHelper" target="_blank" style="color: #3e97eb">项目主页</a>查看<a href="https://mp.weixin.qq.com/s?__biz=Mzg2MjU4MDM2NQ==&mid=2247486650&idx=1&sn=d4373164fbc1df2d4399ebfb542a44fe&chksm=ce04f758f9737e4e296d394f71d59a15948bd150f1b2d6746658a085be7aa716b5d54f81a1c5&token=2052139541&lang=zh_CN#rd" target="_blank" style="color: #36be63">详细说明</a>，有问题或建议请<a href="https://greasyfork.org/zh-CN/scripts/422773-链接助手/feedback#post-discussion" target="_blank" style="color: red">反馈</a></div>',
+                        showCloseButton: true,
+                        showConfirmButton: false,
+                        focusCancel: true,
+                        didRender: () => {
+                            
+                            checkbox("excludeAll");
+                            
+                            datainput("excludeHost", "#addExcludeHost", "例外");
+                            
+                            $("#addExcludeHost")
+                            .on("mouseenter", o => $("#excludeHost").blur());
+                            
+                            let len = t.get("textLength", 500);
+                            if(len != 500) $("#limitText").val(len).nextAll("span").text(len);
+                            $("#limitText").on("input", o => $(o.target).nextAll("span").text($(o.target).val()));
+                            
+                            checkbox("autoClickAll");
+                            
+                            datainput("autoClickHost", "#addAutoClickHost", "自动打开");
+                            
+                            $("#addAutoClickHost")
+                            .on("mouseenter", o => $("#autoClickHost").blur());
+                            
+                            select("autoClickSites", "#autoClick");
+                            
+                            $("#removeAutoClick").on("click", o => {
+                                let autoClickSites = t.get("autoClickSites", []),
+                                    select = $("#autoClickSites"),
+                                    selected = select[0].selectedOptions[0],
+                                    value = selected.value;
+                                if (confirm(`是否删除自动打开站点[${value}]`)) {
+                                    autoClickSites = autoClickSites.filter(s => s != value)
+                                    selected.remove();
+                                    if (autoClickSites.length)
+                                        t.set("autoClickSites", autoClickSites);
+                                    else {
+                                        t.delete("autoClickSites");
+                                        $("#autoClick").show();
+                                        select.hide();
+                                        $("#removeAutoClick").hide();
+                                    }
+                                    if (value === locHost)
+                                        $("#autoClick").show();
+                                }
+                            });
+                            
+                            $("#autoClick").on("click", o => {
+                                let autoClickSites = t.get("autoClickSites", []),
+                                    select = $("#autoClickSites");
+                                autoClickSites.push(locHost);
+                                select.append(`<option value="${locHost}" selected>${locHost}</option>`);
+                                t.set("autoClickSites", autoClickSites);
+                                $("#autoClick").hide();
+                                select.show();
+                                $("#removeAutoClick").show();
+                            });
+                            
+                            checkbox("jumpToMirror");
+                            
+                            checkbox("isAddBlank", "#addBlank", true);
+
+                            checkbox("relative");
+                            
+                            select("defaultTargetSites", "#defaultTarget, .lh-target-blank");
+                            
+                            $("#removeDefault").on("click", o => {
+                                let defaultSites = t.get("defaultTargetSites", []),
+                                    select = $("#defaultTargetSites"),
+                                    selected = select[0].selectedOptions[0],
+                                    value = selected.value;
+                                if (confirm(`是否删除保持默认打开方法站点[${value}]`)) {
+                                    defaultSites = defaultSites.filter(s => s != value)
+                                    selected.remove();
+                                    if (defaultSites.length)
+                                        t.set("defaultTargetSites", defaultSites);
+                                    else {
+                                        t.delete("defaultTargetSites");
+                                        $("#defaultTarget").show();
+                                        select.hide();
+                                        $("#removeDefault").hide();
+                                    }
+                                    if (value === locHost) {
+                                        $("#addBlank").parents("li").fadeIn();
+                                        $("#relative").parents("li").fadeIn();
+                                        $("#defaultTarget").show();
+                                    }
+                                }
+                            });
+                            
+                            $("#defaultTarget").on("click", o => {
+                                let defaultSites = t.get("defaultTargetSites", []),
+                                    select = $("#defaultTargetSites");
+                                defaultSites.push(locHost);
+                                select.append(`<option value="${locHost}" selected>${locHost}</option>`);
+                                t.set("defaultTargetSites", defaultSites);
+                                $("#defaultTarget").hide();
+                                select.show();
+                                $("#removeDefault").show();
+                                $("#addBlank").parents("li").fadeOut();
+                                $("#relative").parents("li").fadeOut();
+                            });
+                        },
+                        willClose: () => {
+                            let len = $("#limitText").val();
+                            if (len != "500" || t.get("textLength", false)) t.set("textLength", len);
+                        },
+                    });
+                
+                function checkbox(name, selector = "#" + name,  defaultVal = false) {
+                    let checked = t.get(name, defaultVal),
+                        input = $(selector).parent().next().children("input[list]");
+                    $(selector).prop("checked", checked);
+                    if (input) input.prop("disabled", checked)
+                    
+                    $(selector).on("change", o => {
+                        let checked = o.target.checked;
+                        if (input)
+                            input.prop("disabled", checked);
+                        t.set(name, checked);
+                    });
+                }
+                
+                function select(name, hide = "") {
+                    let data = t.get(name, []),
+                        select = $("#" + name);
+                    if (data.length) {
+                        for (let d of data) {
+                            if (d === locHost) {
+                                hide && $(hide).hide();
+                                select.append(`<option value="${d}" selected>${d}</option>`);
+                            } else
+                                select.append(`<option value="${d}">${d}</option>`);
+                        }
+                        select.show().next("button").show();
+                    }
+                }
+                
+                function datalist(name) {
+                    let data = t.get(name, []),
+                        list = $("#" + name);
+                    if (data.length) {
+                        for (let d of data)
+                        list.append(`<option value="${d}"></option>`);
+                    }
+                }
+                
+                function datainput(inputId, btnSlt, title) {
+                    let name = inputId + "s",
+                        inputSlt = "#" + inputId;
+                    datalist(name);
+                    
+                    
+                    $(inputSlt).on("change", o => {
+                        let data = t.get(name, []),
+                            host = o.target.value.trim();
+                        
+                        if (data.includes(host))
+                            $(btnSlt).prop("title", `删除${title}域名`).text("删除").one("click", o => {
+                                if (confirm(`是否删除${title}域名<${host}>？`))
+                                    del(name, inputSlt);
+                                else
+                                    $(inputSlt).val("");
+                            });
+                        else
+                            $(btnSlt).prop("title", `添加${title}域名`).text("添加").one("click", o => add(name, inputSlt));
+                    });
+                }
+                
+                function add(name, selector) {
+                    let node = $(selector),
+                        value = node.val();
+                    if (value && !value.includes("example.com") && value.match(/^[-\w]+(?:\.[-\w]+)+$/)) {
+                        let data = t.get(name, []),
+                            list = $("#" + name);
+                        data.push(value);
+                        t.set(name, data);
+                        node.val("");
+                        list.append(`<option value="${value}"></option>`);
+                        t.showNotice(`添加域名<${value}>成功！`);
+                    } else t.showNotice("请输入有效域名！");
+                }
+                
+                function del(name, selector) {
+                    let node = $(selector),
+                        value = node.val();
+                    if (value && !value.includes("example.com") && value.match(/^[-\w]+(?:\.[-\w]+)+$/)) {
+                        let data = t.get(name, []),
+                            list = $("#" + name);
+                        data = data.filter(d => d != value);
+                        t.set(name, data);
+                        node.val("");
+                        $("#" + name + `>option[value="${value}"]`).remove();
+                        t.showNotice(`删除域名<${value}>成功！`);
+                    } else t.showNotice("请输入有效域名！");
+                }
+            }
+            
+            t.registerMenu('🔗配置', showSettings);
             
             async function listener(obj) {
                 let e = obj.originalEvent.explicitOriginalTarget || obj.originalEvent.target,
@@ -1248,7 +1710,7 @@ $(function () {
                 }
 
                 if (e && e.localName === "a" && e.href) {
-                    let a = e, isPrevent = false;
+                    let a = e, isPrevent = false, isCancel = false;
                     if (/^magnet:\?xt=urn:btih:|^ed2k:\/\/\|file\||^thunder:\/\//i.test(a.href)) {
                         $(a).removeAttr('target');
                         if (isTextToLink) a.click();
@@ -1258,148 +1720,159 @@ $(function () {
                     if (a.host === "pan.baidu.com" && a.hash.startsWith("#/transfer/send?surl="))
                         return;
 
-                    if (locHref.includes("mod.3dmgame.com/mod/"))
-                        a.search = "3dmgame.com";
-                                    
-                    if (locHost == "bbs.nga.cn" || locHost == "nga.178.com" || locHost == "ngabbs.com") {
-                        if (!(a.host == "bbs.nga.cn" || a.host == "nga.178.com" || a.host == "ngabbs.com"))
-                            if (a.attributes.onclick && a.attributes.onclick.nodeValue.startsWith("ubbcode.showUrlAlert(event,this)"))
-                                a.onclick = null;
-                    }
-                    
-                    if (locHost == "www.youtube.com" && a.href.includes("www.youtube.com/redirect?")) {
-                        if (!a.style.padding) {
-                            $("#secondary-links.ytd-c4-tabbed-header-renderer a.ytd-c4-tabbed-header-renderer").css({padding: "10px 10px 10px 2px", lineHeight: 0, display: "inline-block"});
-                            $("#secondary-links.ytd-c4-tabbed-header-renderer a.ytd-c4-tabbed-header-renderer:first-child").css("padding-left", "10px");
-                        }
-                        a.classList.remove("yt-simple-endpoint");
-                    }
-                    
-                    if (locHost == "www.facebook.com") {
-                        a.onclick = function() { return false; };
-                        t.open(a.href);
-                    }
-                    
                     let pan = YunDisk.sites[YunDisk.mapHost(a.host)];
-                    if (!pan && locHost !== "blog.csdn.net" && !cleanRedirectLink(a)) {
-						let text = a.textContent.trim().replace(/…$/, "");
-                        if (RegExp("^(" + http_re_str + ")$").test(text)) {
-                            if (isLinkText(a)) {
-                                t.title(a, '【替换】');
-                                a.href = t.http(text, true);
-                                t.increase();
-                            } else if (locHost == "twitter.com" && a.host == "t.co")
-                                a.href = t.http(text, true);
-                            else if (!isTextToLink && !a.parentElement.className.includes('text2Link') && locHost != 'www.facebook.com' && a.host != 'download.downsx.org' && isDifferent(a)) {
-                                a.onclick = function() { return false; };
-                                isPrevent = true;
-                                await t.confirm("是否使用链接文本替换目标链接后打开？",
-                                        () => {
-                                            // 是
-                                            let linkTextPrefixes = t.get("linkTextPrefixes", []),
-                                                reg = /(?:http|https|\/|\%2F).*?\?.+?=|.*?\?/,
-                                                result = reg.exec(a.href);
-                                            if (result) {
-                                                linkTextPrefixes.push(result[0]);
-                                                t.set("linkTextPrefixes", linkTextPrefixes);
-                                            }
-                                            t.title(a, '【替换】');
-                                            a.href = t.http(text, true);
-                                            t.increase();
-                                        },
-                                        () => {
-                                            // 否
-                                        },
-                                        () => {
-                                            // 取消
-                                            isPrevent = false;
-                                            a.onclick = null;
-                                });
+                    if (!t.get("excludeAll", false)) {         
+                        if (locHost == "bbs.nga.cn" || locHost == "nga.178.com" || locHost == "ngabbs.com") {
+                            if (!(a.host == "bbs.nga.cn" || a.host == "nga.178.com" || a.host == "ngabbs.com"))
+                                if (a.attributes.onclick && a.attributes.onclick.nodeValue.startsWith("ubbcode.showUrlAlert(event,this)"))
+                                    a.onclick = null;
+                        }
+                        
+                        if (locHost == "www.youtube.com" && a.href.includes("www.youtube.com/redirect?")) {
+                            if (!a.style.padding) {
+                                $("#secondary-links.ytd-c4-tabbed-header-renderer a.ytd-c4-tabbed-header-renderer").css({padding: "10px 10px 10px 2px", lineHeight: 0, display: "inline-block"});
+                                $("#secondary-links.ytd-c4-tabbed-header-renderer a.ytd-c4-tabbed-header-renderer:first-child").css("padding-left", "10px");
+                            }
+                            a.classList.remove("yt-simple-endpoint");
+                        }
+                        
+                        if (locHost == "www.facebook.com") {
+                            a.onclick = function() { return false; };
+                            if (a.host !== "github.com" || !t.get("jumpToMirror", false))
+                                t.open(a.href);
+                        }
+
+                        if (!(pan || locHost === "blog.csdn.net"
+                              || t.get("excludeHosts", []).some(s => a.host.includes(s))
+                              || cleanRedirectLink(a))
+                            ) {
+                            let text = a.textContent.trim().replace(/…$/, "");
+                            if (RegExp("^(" + http_re_str + ")$").test(text)) {
+                                if (isLinkText(a)) {
+                                    t.title(a, '【替换】');
+                                    a.href = t.http(text, true);
+                                    t.increase();
+                                } else if (locHost == "twitter.com" && a.host == "t.co")
+                                    a.href = t.http(text, true);
+                                else if (!isTextToLink && !a.parentElement.className.includes("text2Link") && locHost !== "www.facebook.com" && a.host != "download.downsx.org" && isDifferent(a)) {
+                                    a.onclick = function() { return false; };
+                                    isPrevent = true;
+                                    await t.confirm("是否使用链接文本替换目标链接后打开？",
+                                            () => {
+                                                // 是
+                                                let linkTextPrefixes = t.get("linkTextPrefixes", []),
+                                                    reg = /(?:http|https|\/|\%2F).*?\?.+?=|.*?\?/,
+                                                    result = reg.exec(a.href);
+                                                if (result) {
+                                                    linkTextPrefixes.push(result[0]);
+                                                    t.set("linkTextPrefixes", linkTextPrefixes);
+                                                }
+                                                t.title(a, '【替换】');
+                                                a.href = t.http(text, true);
+                                                t.increase();
+                                            },
+                                            () => {
+                                                // 否
+                                            },
+                                            () => {
+                                                // 取消
+                                                isPrevent = false;
+                                                isCancel = true;
+                                                a.onclick = null;
+                                    });
+                                }
                             }
                         }
                     }
                     
                     if (!obj.originalEvent.button || isTextToLink) {
-						if (jumpToMirror) {
-							if (a.host.includes("wikipedia.org")) {
-								// 维基百科
-								if (locHost !== "www.bing.com" && !locHost.includes("www.google."))
-									a.host = a.host.replace(
-										"wikipedia.org",
-										"wiki.sxisa.org"
-									);
-							} else if (a.host.includes("developers.google.com")) {
-								// 谷歌开发者
-								if (!locHost == "developers.google.com")
-									a.host = a.host.replace(
-										"developers.google.com",
-										"developers.google.cn"
-									);
-							} else if (locHost !== "github.com" && a.host === "github.com") {
-								// Github
-								let mirrors = [
-												["fastgit", "hub.fastgit.org"],
-												["cnpmjs", "github.com.cnpmjs.org"],
-												["rc1844", "github.rc1844.workers.dev"]
-											  ],
-									rand = t.rand(1, 9) % 3,
-									mirror = mirrors[rand],
-									next = mirrors[(rand + 1) % 3];
-								a.onclick = function() { return false; };
-								isPrevent = true;
-								await t.confirm(`是否跳转到【${mirror[0]}】镜像站？`,
-												() => {
-													// 是
-													t.title(a, `已替换为【${mirror[0]}】镜像链接，请不要登录帐号！！！`);
-													a.host = a.host.replace("github.com", mirror[1]);
-													setTimeout(() => t.showNotice("镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！"), 1000);
-												},
-												() => {
-													// 否
-													if (locHost === "blog.csdn.net") t.open(a.href);
-												},
-												() => {
-													// 取消
-													isPrevent = false;
-													a.onclick = null;
-												});
-							} else if (a.host.includes("chrome.google.com")) {
-								// 谷歌应用商店
-								if (isChromium) {
-									a.onclick = function() { return false; };
-									isPrevent = true;
-									await t.confirm('是否跳转到【crx4chrome】镜像站？',
-													() => {
-														// 是
-														t.title(a);
-														a.href = a.href.replace(/chrome\.google\.com\/webstore\/detail[\/\w\-%]*(?=\w{32})/i, 'www.crx4chrome.com/extensions/');
-													},
-													() => {
-														// 否
-													},
-													() => {
-														// 取消
-														isPrevent = false;
-														a.onclick = null;
-									});
-								}
-							}
-						}
-					}
+                        if (t.get("jumpToMirror", false)) {
+                            if (a.host.includes("wikipedia.org")) {
+                                // 维基百科
+                                if (locHost !== "www.bing.com" && !locHost.includes("www.google."))
+                                    a.host = a.host.replace(
+                                        "wikipedia.org",
+                                        "wiki.sxisa.org"
+                                    );
+                            } else if (a.host.includes("developers.google.com")) {
+                                // 谷歌开发者
+                                if (!locHost == "developers.google.com")
+                                    a.host = a.host.replace(
+                                        "developers.google.com",
+                                        "developers.google.cn"
+                                    );
+                            } else if (locHost !== "github.com" && a.host === "github.com" && !a.pathname.startsWith("/login")) {
+                                // Github
+                                let mirrors = [
+                                                ["fastgit", "hub.fastgit.org"],
+                                                ["cnpmjs", "github.com.cnpmjs.org"],
+                                                ["rc1844", "github.rc1844.workers.dev"]
+                                              ],
+                                    rand = t.rand(1, 9) % 3,
+                                    mirror = mirrors[rand],
+                                    next = mirrors[(rand + 1) % 3];
+                                a.onclick = function() { return false; };
+                                isPrevent = true;
+                                await t.confirm(`是否跳转到【${mirror[0]}】镜像站？`,
+                                                () => {
+                                                    // 是
+                                                    t.title(a, `已替换为【${mirror[0]}】镜像链接，请不要登录帐号！！！`);
+                                                    a.host = a.host.replace("github.com", mirror[1]);
+                                                    setTimeout(() => t.showNotice("镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！\n镜像站请不要登录账号！！！"), 1000);
+                                                },
+                                                () => {
+                                                    // 否
+                                                    if (locHost === "blog.csdn.net") t.open(a.href);
+                                                },
+                                                () => {
+                                                    // 取消
+                                                    isPrevent = false;
+                                                    isCancel = true;
+                                                    a.onclick = null;
+                                                });
+                            } else if (a.host.includes("chrome.google.com")) {
+                                // 谷歌应用商店
+                                if (isChromium) {
+                                    a.onclick = function() { return false; };
+                                    isPrevent = true;
+                                    await t.confirm("是否跳转到【crx4chrome】镜像站？",
+                                                    () => {
+                                                        // 是
+                                                        t.title(a);
+                                                        a.href = a.href.replace(/chrome\.google\.com\/webstore\/detail[\/\w\-%]*(?=\w{32})/i, "www.crx4chrome.com/extensions/");
+                                                    },
+                                                    () => {
+                                                        // 否
+                                                        if (locHost === "blog.csdn.net") t.open(a.href);
+                                                    },
+                                                    () => {
+                                                        // 取消
+                                                        isPrevent = false;
+                                                        isCancel = true;
+                                                        a.onclick = null;
+                                    });
+                                }
+                            }
+                        }
+                    }
                     
                     pan = YunDisk.sites[YunDisk.mapHost(a.host)];
                     if (pan) YunDisk.addCode(a, isInput);
                     
                     if (isTextToLink) {
                         let isClicked = false;
-                        if (pan || t.get("autoClickHosts", []).concat(YunDisk.pans).some(h => h == a.host)) {
-                            a.click();
-                            isClicked = true;
+                        if (t.get("autoClickAll", false) || pan
+                            || t.get("autoClickHosts", []).concat(YunDisk.pans).some(h => h === a.host)
+                            || t.get("autoClickSites", []).some(h => h === locHost)) {
+                            if (!isCancel) {
+                                a.click();
+                                isClicked = true;
+                            }
                         }
 
                         if (isInput) {
                             if (!isClicked) a.click();
-                            $('#L_DirectInput').val('');
+                            $('#L_DirectInput').val("");
                         }
                     }
                     
@@ -1415,58 +1888,11 @@ $(function () {
                 }
             }
             
-            // 注册菜单项添加文本转链接后自动跳转域名
-            t.registerMenu('添加自动跳转域名', addAutoClick);
-            
-            function addAutoClick() {
-                let autoClickHosts = t.get("autoClickHosts", []), input = prompt("输入的域名的链接文本转链接后会自动跳转", locHost);
-                if (input) {
-                    if (/[\w]+(\.[\w]+)+/.test(input)) {
-                        if (!autoClickHosts.some((s) => s.includes(input))) {
-                            autoClickHosts.push(input);
-                            t.set("autoClickHosts", autoClickHosts);
-                        } else t.showNotice(`域名 <${input}> 已存在!!!`);
-                    } else t.showNotice(`<${input}> 不是有效域名!!!`);
-                }
-            }
-            
-            // 注册菜单项自动切换镜像
-            let jumpToMirror = t.get("jumpToMirror", true);
-            
-            let menuID = t.registerMenu(
-                        `${jumpToMirror ? "[✔]" : "[✖]"}自动切换镜像`,
-                        autoJump
-                    );
-
-            function autoJump() {
-                jumpToMirror = !jumpToMirror;
-                t.set("jumpToMirror", jumpToMirror);
-                t.unregisterMenu(menuID);
-                menuID = t.registerMenu(
-                    `${jumpToMirror ? "[✔]" : "[✖]"}自动切换镜像`,
-                    autoJump
-                );
-            }
-            
-            let textLength = t.get("textLength", 500);
-
-            // t.registerMenu(
-            //     `设置文本字数限制(${textLength})`,
-            //     limitText
-            // );
-
-            // function limitText() {
-            //     let input = prompt(
-            //         "请输入文本字数限制: ",
-            //         t.get("textLength", 200)
-            //     );
-            // }
-            
             let url_regexp_g = new RegExp(url_regexp, "ig");
 
             function text2Link(node, isInput) {
                 let text = node.nodeValue;
-                if (!["115://", "aliyunpan://", "tg://", "ss://", "ssr://", "vmess://", "trojan://", "bdpan://", "BDLINK", "SHA1", "SHA256"].some(p => text.includes(p)) && (text.length < textLength || isInput)) {
+                if (!["flashget://", "qqdl://", "tg://", "ss://", "ssr://", "vmess://", "trojan://", "115://", "aliyunpan://", "bdpan://", "BDLINK"].some(p => text.includes(p)) && ![/SHA-?(1|256)/i, /MD-?5/i].some(e => e.test(text)) && (text.length < t.get("textLength", 500) || isInput)) {
                     let parent = null;
                     if (locHost === "tieba.baidu.com") {
                         if ((node.parentElement.localName === "div" && node.parentElement.id.match(/^post_content_\d+$/)) ||
@@ -1542,7 +1968,6 @@ $(function () {
                 "cloud.tencent.com",
                 "translate.google.com",
                 "domains.live.com",
-                "passport.yandex.ru",
                 "www.iconfont.cn",
                 "www.kdocs.cn",
                 "help.aliyun.com",
@@ -1558,27 +1983,13 @@ $(function () {
                 "lixian.vip.xunlei.com",
                 "fanyi.baidu.com",
                 "lanjing.jd.com",
+                "image.baidu.com",
+                "detail.1688.com",
                 "api.",
+                "passport.",
             ];
-            
-            t.update("excludeSites", excludes);
-            
-            let excludeHosts = t.get("excludeHosts", []);
-            
-            t.registerMenu("添加例外域名", addExcludeHost);
 
-            // 添加例外域名
-            function addExcludeHost() {
-                let input = prompt("输入的域名下的链接不会被净化: ", locHost);
-                if (input) {
-                    if (/[\w]+(\.[\w]+)+/.test(input)) {
-                        if (!excludeHosts.some((s) => s.includes(input))) {
-                            excludeHosts.push(input);
-                            t.set("excludeHosts", excludeHosts);
-                        } else t.showNotice(`例外域名 <${input}> 已存在!!!`);
-                    } else t.showNotice(`<${input}> 不是有效域名!!!`);
-                }
-            }
+            t.update("excludeSites", excludes);
 
             function cleanRedirectLink(a) {
                 // 小众软件
@@ -1616,9 +2027,9 @@ $(function () {
                         a.search = "";
                     }
                 }
-                if (!(["login", "logout", "signin", "signup", "signout", "auth", "oauth", "passport"].some(k => locHref.includes(k))
+                if (!(["login", "logout", "signin", "signup", "signout", "auth", "oauth"].some(k => a.href.includes(k))
                     || /登录|登入|登出|退出|注册|login|logout|signin|signup|signout/i.test(a.textContent)
-                    || excludeHosts.some((s) => a.host.includes(s)))
+                    || excludes.some((s) => a.host.includes(s)))
                 ) {
                     let reg = new RegExp("^((?:http|https|\\/|\\%2F)(?:.*?[?&].+?=|.*?[?&]))(" + http_re_str + ")", "i"),
                         result = reg.exec(decodeURIComponent(a.href));
@@ -1658,44 +2069,11 @@ $(function () {
                 }
             }
 
-            let defaultTargetSites = t.get("defaultTargetSites", []);
-            let isAddBlank = t.get("isAddBlank", false);
-            let isDefault = defaultTargetSites.some((s) => s == location.host);
-            // 注册菜单项该站链接保持默认打开方式
-            if (!isDefault) {
-                let menuID2 = t.registerMenu(
-                    "该站链接保持默认打开方式",
-                    function () {
-                        defaultTargetSites.push(location.host);
-                        t.set("defaultTargetSites", defaultTargetSites);
-                        isDefault = defaultTargetSites.some(
-                            (s) => s == location.host
-                        );
-                        t.unregisterMenu(menuID2);
-                        t.unregisterMenu(menuID);
-                    }
-                );
-
-                // 注册菜单项启停在新标签打开链接
-                let menuID = t.registerMenu(
-                    `${isAddBlank ? "[✔]" : "[✖]"}在新标签打开链接`,
-                    addBlank
-                );
-
-                // 启停在新标签打开链接
-                function addBlank() {
-                    isAddBlank = !isAddBlank;
-                    t.set("isAddBlank", isAddBlank);
-                    t.unregisterMenu(menuID);
-                    menuID = t.registerMenu(
-                        `${isAddBlank ? "[✔]" : "[✖]"}在新标签打开链接`,
-                        addBlank
-                    );
-                }
-            }
-
             // 给链接添加[target="_blank"]属性
             function add_blank(a) {
+                let defaultTargetSites = t.get("defaultTargetSites", []),
+                    isAddBlank = t.get("isAddBlank", true),
+                    isDefault = defaultTargetSites.some((s) => s == location.host);
                 if (isAddBlank && !isDefault) {
                     let result =
                             a.href == "" || a.target == "_blank" ||
