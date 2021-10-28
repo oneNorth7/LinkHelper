@@ -2,7 +2,7 @@
 // @name            链接助手
 // @namespace       https://github.com/oneNorth7
 // @include         *
-// @version         2.0.0
+// @version         2.0.1
 // @author          一个北七
 // @run-at          document-body
 // @description     支持全网主流网盘和小众网盘自动填写密码; 资源站点下载页网盘密码预处理; 文本转链接; 移除链接重定向; 重定向页面自动跳转; 维基百科及镜像、开发者文档、谷歌商店自动切换中文, 维基百科、谷歌开发者、谷歌商店、Github链接转为镜像链接; 新标签打开链接; (外部)链接净化直达
@@ -19,6 +19,7 @@
 // @exclude         *://yiqixie.qingque.cn/d/home/*
 // @exclude         *://www.yuque.com/*/edit
 // @exclude         *://*.cqaso.com/*
+// @exclude         *://xiezuocat.com/#/doc/*
 // @exclude         *://mail.*
 // @grant              GM_registerMenuCommand
 // @grant              GM_unregisterMenuCommand
@@ -402,6 +403,11 @@ $(function () {
                 }
             }
         },
+
+        "www.sxpdf.com": function() {
+            if (locHref.startsWith("https://www.sxpdf.com/wp-content/themes/niao/down.php?id="))
+                $('a[onclick="copyUrl2()"]').removeAttr("onclick");
+        },
     };
 
     if (Preprocess[locHost]) Preprocess[locHost]();
@@ -538,7 +544,7 @@ $(function () {
                 // 萌云
                 inputSelector: "#pwd",
                 buttonSelector: "button.MuiButton-root",
-                regStr: "[a-z\\d]{3,8}",
+                regStr: "[a-z\\d]{3,8}|\\w+\\.\\w+\\.\\w+",
                 timeout: 500,
                 password: true,
                 cleanHash: true,
@@ -641,6 +647,15 @@ $(function () {
                 reverse: true,
                 hidden: true,
             },
+
+            "www.123pan.com": {
+                // 123云盘
+                inputSelector: "input.ant-input",
+                buttonSelector: "input.ant-input+button",
+                regStr: "[a-z\\d]{4,8}",
+                timeout: 1000,
+                react: true,
+            },
         },
         
         pans: [
@@ -669,32 +684,35 @@ $(function () {
 
         mapHost(host) {
             return host
-                .replace(/^yun.baidu.com/, 'pan.baidu.com')
-                .replace(/.*lanzou[iswx]?.com/, 'lanzou.com')
-                .replace(/^(?:[a-z]\d{3}|\d{3}[a-z]|t00y|\w+\.ctfile)\.com$/, 'ctfile.com')
-                .replace(/^ct\.\w+\.(?:com|me|org)$/, 'ctfile.com')
-                .replace('dl.sixyin.com', 'ctfile.com')
-                .replace('dw.yxssp.com', 'ctfile.com')
-                .replace(/quqi\.\w+\.com/, 'quqi.com')
-                .replace('feixin.10086.cn', '139.com')
-                .replace('ws28.cn', 'www.wenshushu.cn')
-                .replace('zb.my.to:5000', 'gofile.me')
-                .replace('cloud.dnxshare.cn', 'drive.dnxshare.cn')
-                .replace(/\w+\-my\.sharepoint\.(?:com|cn)/, 'my.sharepoint.com')
-                .replace(/\w{6}.link.yunpan.360.cn|yunpan.cn/, 'yunpan.360.cn')
-                .replace('mofile.own-cloud.cn', 'mo.own-cloud.cn')
-                .replace('cloud.qingstore.cn', 'moecloud.cn')
-                .replace('pan.mebk.org', 'moecloud.cn')
-                .replace('cncncloud.com', 'moecloud.cn')
-                .replace('ilolita945.softether.net:5212', 'moecloud.cn')
-                .replace('my-file.cn', 'moecloud.cn')
-                .replace('pan.bilnn.com', 'moecloud.cn')
-                .replace('bx.qingstore.cn', 'moecloud.cn')
-                .replace('drive.dnxshare.cn', 'moecloud.cn')
-                .replace('pan.mba', 'moecloud.cn')
-                .replace('pan.oddba.cn', 'moecloud.cn')
-                .replace('nf.mail.163.com', 'u.163.com')
-                .replace('1drv.ms', 'onedrive.live.com');
+                .replace(/^yun.baidu.com/, "pan.baidu.com")
+                .replace(/.*lanzou[iswx]?.com/, "lanzou.com")
+                .replace(/^(?:[a-z]\d{3}|\d{3}[a-z]|t00y|\w+\.ctfile)\.com$|^ctfile\.\w+\.cn$/, "ctfile.com")
+                .replace(/^ct\.\w+\.(?:com|me|org)$/, "ctfile.com")
+                .replace("dl.sixyin.com", "ctfile.com")
+                .replace("dw.yxssp.com", "ctfile.com")
+                .replace("down.sxpdf.com", "ctfile.com")
+                .replace(/quqi\.\w+\.com/, "quqi.com")
+                .replace("feixin.10086.cn", "139.com")
+                .replace("ws28.cn", "www.wenshushu.cn")
+                .replace("zb.my.to:5000", "gofile.me")
+                .replace("cloud.dnxshare.cn", "drive.dnxshare.cn")
+                .replace(/\w+\-my\.sharepoint\.(?:com|cn)/, "my.sharepoint.com")
+                .replace(/\w{6}.link.yunpan.360.cn|yunpan.cn/, "yunpan.360.cn")
+                .replace("mofile.own-cloud.cn", "mo.own-cloud.cn")
+                .replace("cloud.qingstore.cn", "moecloud.cn")
+                .replace("pan.mebk.org", "moecloud.cn")
+                .replace("cncncloud.com", "moecloud.cn")
+                .replace("ilolita945.softether.net:5212", "moecloud.cn")
+                .replace("my-file.cn", "moecloud.cn")
+                .replace("pan.bilnn.com", "moecloud.cn")
+                .replace("bx.qingstore.cn", "moecloud.cn")
+                .replace("drive.dnxshare.cn", "moecloud.cn")
+                .replace("pan.mba", "moecloud.cn")
+                .replace("pan.oddba.cn", "moecloud.cn")
+                .replace("pan.adycloud.com", "moecloud.cn")
+                .replace("nf.mail.163.com", "u.163.com")
+                .replace("1drv.ms", "onedrive.live.com")
+                .replace("alywp.net", "www.aliyundrive.com");
         },
 
         redirect(a, d) {
@@ -709,7 +727,7 @@ $(function () {
         autoFill(host) {
             let site = this.sites[host];
             // 百度云文档
-            if (host === "pan.baidu.com" && locPath.startsWith('/doc/share/'))
+            if (host === "pan.baidu.com" && locPath.startsWith("/doc/share/"))
                 site = {
                     inputSelector: "input.u-input__inner",
                     buttonSelector: "div.dialog-footer button.u-btn.u-btn--primary",
@@ -1196,7 +1214,7 @@ $(function () {
         };
         
         if (RedirectPage.redirect(locHost)) return;
-        else if (locHost.match(/.+wiki(?:\.sxisa|pedia)\.org/))
+        else if (locHost.match(/.+wiki(?:\.hancel|pedia)\.org/))
             RedirectPage.wiki();
         else if (locHost == "chrome.google.com")
             RedirectPage.chrome();
@@ -1210,10 +1228,10 @@ $(function () {
                 $(document).on("selectstart mousedown", (obj) => listener(obj));
             else
                 $(document).on("mouseup", (obj) => listener(obj));
-            
-            if (locHost.includes("blog.csdn.net"))
-                document.body.addEventListener("click", function (obj) {
-                    if (!t.get("excludeAll", false)) {
+
+            if (!t.get("excludeAll", false)) {
+                if (locHost.includes("blog.csdn.net"))
+                    document.body.addEventListener("click", function (obj) {
                         let e = obj.target;
                         if (e.localName === "a" && e.href && e.href.match(http_re_str)) {
                             if (e.id !== "btn-readmore-zk" && !(e.attributes.href && e.attributes.href.nodeValue.startsWith("#"))) {
@@ -1222,22 +1240,25 @@ $(function () {
                                 obj.preventDefault();
                             }
                         }
-                    }
-                }, true);
+                    }, true);
             
-            if (locHost === "www.yuque.com") {
-                setTimeout(() => {
-                    let article = $("#content");
-                    article.replaceWith(article.clone());
-                }, 3000);
+                if (locHost === "www.yuque.com") {
+                    setTimeout(() => {
+                        let article = $("#content");
+                        article.replaceWith(article.clone());
+                    }, 3000);
+                }
             }
-            
+
             // 移除登录和注册按钮
             if (["hub.fastgit.org", "github.com.cnpmjs.org", "github.rc1844.workers.dev"].some(h => locHost === h)) {
                 $(".HeaderMenu div.position-relative.mr-3, div.position-relative.mr-3+a, div.d-flex.flex-items-center>a").remove();
                 if (locPath === "/")
                     $("form div.d-flex, div.home-nav-hidden>a").remove();
             }
+
+            if (locHost === "bbs.pcbeta.com")
+                $(document.head).append(`<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.min.css">`);
 
             GM_addStyle(`
                 .swal2-popup {
@@ -1466,7 +1487,6 @@ $(function () {
                         footer: '<div class="lh-footer">前往<a href="https://github.com/oneNorth7/LinkHelper" target="_blank" style="color: #3e97eb">项目主页</a>查看<a href="https://mp.weixin.qq.com/s?__biz=Mzg2MjU4MDM2NQ==&mid=2247486650&idx=1&sn=d4373164fbc1df2d4399ebfb542a44fe&chksm=ce04f758f9737e4e296d394f71d59a15948bd150f1b2d6746658a085be7aa716b5d54f81a1c5&token=2052139541&lang=zh_CN#rd" target="_blank" style="color: #36be63">详细说明</a>，有问题或建议请<a href="https://greasyfork.org/zh-CN/scripts/422773-链接助手/feedback#post-discussion" target="_blank" style="color: red">反馈</a></div>',
                         showCloseButton: true,
                         showConfirmButton: false,
-                        focusCancel: true,
                         didRender: () => {
                             
                             checkbox("excludeAll");
@@ -1792,7 +1812,7 @@ $(function () {
                                 if (locHost !== "www.bing.com" && !locHost.includes("www.google."))
                                     a.host = a.host.replace(
                                         "wikipedia.org",
-                                        "wiki.sxisa.org"
+                                        "wiki.hancel.org"
                                     );
                             } else if (a.host.includes("developers.google.com")) {
                                 // 谷歌开发者
@@ -1932,8 +1952,8 @@ $(function () {
                     }
                     
                     if (count) t.increase();
-                    if (isInput) return !isMail && span && span.children("a")[0];
-                    return !isMail && count == 1 && span && span.children("a")[0];
+                    
+                    return !isMail && span && span.children("a")[0];
                 }
             }
 
@@ -1987,9 +2007,9 @@ $(function () {
                 "detail.1688.com",
                 "api.",
                 "passport.",
+                "www.360kuai.com",
+                "zhidao.baidu.com",
             ];
-
-            t.update("excludeSites", excludes);
 
             function cleanRedirectLink(a) {
                 // 小众软件
@@ -2027,7 +2047,7 @@ $(function () {
                         a.search = "";
                     }
                 }
-                if (!(["login", "logout", "signin", "signup", "signout", "auth", "oauth"].some(k => a.href.includes(k))
+                if (!(["login", "logout", "signin", "signup", "signout", "auth", "oauth", "translate.google.com"].some(k => a.href.includes(k))
                     || /登录|登入|登出|退出|注册|login|logout|signin|signup|signout/i.test(a.textContent)
                     || excludes.some((s) => a.host.includes(s)))
                 ) {
@@ -2046,7 +2066,7 @@ $(function () {
                                 );
 
                                 t.title(a, "【净化】");
-                                if (["c.pc.qq.com","mail.qq.com", "m.sogou.com", "www.douban.com", "www.google.com", "txt.guoqiangti.ga", "g.luciaz.me"].some((h) => a.host == h))
+                                if (!href.includes("?") && href.includes("&"))
                                     a.href = href.split("&")[0];
                                 else a.href = href.replace(/______/g, ".");
                             }
@@ -2054,7 +2074,7 @@ $(function () {
                             return true;
                         }
                     } else {
-                        reg = new RegExp("((?:http|https|\\/|\\%2F)(?:.*[?&].+?=|.*[?&]|.*(?:go|goto|link)\\/))(" + base64_re_str + ")", "i");
+                        reg = new RegExp("((?:http|https|\\/|\\%2F)(?:.*[?&].+?=|.*[?&]|.*\\/(?:go|goto|link)\\/))(" + base64_re_str + ")", "i");
                         result = reg.exec(decodeURIComponent(a.href));
                         if (result) {
                             let temp = atob(result[2]);
