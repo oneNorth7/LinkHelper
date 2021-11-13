@@ -114,7 +114,7 @@
 <details style="font-size: 1.5em">
     <summary id="iii">III. 重定向页面自动跳转</summary>
 <p>支持的重定向页面站点列表：<a href="http://show.bookmarkearth.com/view/81484">书签地球</a>、<a href="http://t.cn/RgAKoPE">新浪短链</a>、<a href="http://t.cn/A6qYCh4U">新浪绿色上网</a>、<a href="https://sunbox.cc/wp-content/themes/begin/go.php?url=aHR0cHM6Ly9naXRodWIuY29tL0N5ZW5vY2gvRmx1dHRlci1Db29sYXBrL3JlbGVhc2Vz">阳光盒子</a>、<a href="https://www.itdaan.com/link/aHR0cDovL3d3dy5maWxlc29uaWMuY29tL2ZpbGUvMTY5NjYwNzc2MQ==">开发者知识库</a>、<a href="https://link.csdn.net/?target=https://github.com/oneNorth7">CSDN</a>、<a href="https://support.qq.com/products/57688/link-jump?jump=https%3A%2F%2Fcmd.im%2F">兔小巢</a>、<a href="https://c.pc.qq.com/middlem.html?pfurl=bing.com">QQ非官方页面</a>、<a href="https://developers.weixin.qq.com/community/middlepage/href?href=https://github.com/oneNorth7/LinkHelper">微信非官方页面</a>、<a href="https://docs.qq.com/scenario/link.html?url=https://greasyfork.org/zh-CN/scripts/422773-%E9%93%BE%E6%8E%A5%E5%8A%A9%E6%89%8B">腾讯文档</a>、<a href="https://www.tianyancha.com/security?target=http://www.baidu.com">天眼查</a>、<a href="https://www.yuque.com/r/goto?url=https%3A%2F%2Fgitee.com">语雀</a>、<a href="http://jump2.bdimg.com/safecheck/index?url=">百度贴吧</a>、<a href="https://iphone.myzaker.com/zaker/link.php?pk=60bed7f88e9f0921d2076b7b&amp;b=aHR0cHM6Ly9jeWJlcm5ld3MuY29tL3BlcnNvbmFsLWRhdGEtbGVhay1jaGVjay8=&amp;bcode=c1a7a62b&amp;target=_new">Zaker</a>、<a href="https://game.bilibili.com/linkfilter/?url=https://www.bing.com/">哔哩哔哩游戏</a>、<a href="https://www.chinaz.com/go.shtml?url=https://www.bing.com/">站长之家</a>、<a href="https://link.logonews.cn/?url=http://www.mod.gov.cn/topnews/2021-07/29/content_4890496.htm">标志情报局</a>、<a href="https://www.douban.com/link2/?url=https://github.com/oneNorth7/LinkHelper">豆瓣</a>、<a href="https://link.zhihu.com/?target=https://github.com/oneNorth7/LinkHelper">知乎</a>、<a href="https://www.jianshu.com/go-wild?ac=2&url=https://github.com/oneNorth7/LinkHelper">简书</a>、<a href="https://link.juejin.cn/?target=https://github.com/oneNorth7/LinkHelper">掘金</a>、<a href="https://www.oschina.net/action/GoToLink?url=https://github.com/oneNorth7/LinkHelper">开源中国</a>、<a href="https://www.youtube.com/redirect?q=https://github.com/oneNorth7/LinkHelper">Youtube</a> 等等（欢迎热心反馈）</p>
-<p>通过<code>移除链接重定向</code>功能可<strong>较大程度</strong>地避免在浏览页面过程中碰到<strong>重定向页面</strong>，但不能排除从浏览记录访问或无法移除链接重定向（例如贴吧链接的文本不是HTTP链接文本而是描述文本）的情况</p>
+<p>通过<code>移除链接重定向</code>功能可<strong>较大程度</strong>地避免在浏览页面过程中碰到<strong>重定向页面</strong>，但不能排除从浏览记录访问或无法移除链接重定向（例如贴吧链接的文本不是HTTP链接文本而是描述文本）和无法一次性移除链接重定向（例如某个网站的外链是另一个网站的外链）的情况</p>
 <img alt="贴吧跳转页面" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/贴吧跳转页面.gif">
 </details>
 
@@ -122,7 +122,7 @@
     <summary id="iv">IV. 网盘自动填写密码</summary>
 <ol>
 <li>
-<p>可自动搜索密码并添加，跳转后自动填写密码并提交，支持的网盘或在线文档站点列表：<a href="https://pan.baidu.com/">百度云</a>、<a href="https://eyun.baidu.com/">百度企业网盘</a>、<a href="https://pan.baidu.com/doc">百度云文档</a>、<a href="https://cloud.189.cn/">天翼云盘</a>、<a href="https://www.lanzou.com/">蓝奏云</a>、<a href="https://vdisk.weibo.com/">微盘</a>、<a href="https://share.weiyun.com/">微云</a>、<a href="https://pan.xunlei.com/">迅雷云盘</a>、<a href="http://115.com/">115网盘</a>、<a href="https://caiyun.139.com/">和彩云</a>、<a href="https://quqi.com/">曲奇云</a>、<a href="https://yunpan.360.cn/">360安全云盘</a>、<a href="https://pan-yz.chaoxing.com/">超星云盘</a>、<a href="https://www.wenshushu.cn/">文叔叔</a>、<a href="https://www.jianguoyun.com/">坚果云</a>、<a href="https://shandianpan.com/">闪电盘</a>、<a href="https://my.sharepoint.com/">SharePoint</a>、<a href="https://onedrive.live.com/">OneDrive</a>、<a href="https://cowtransfer.com/">奶牛快传</a>、<a href="http://u.163.com/">网易邮箱网盘</a>、<a href="https://www.aliyundrive.com/">阿里云盘</a>、<a href="https://www.123pan.com/">123云盘</a>、<a href="https://mo.own-cloud.cn/">小麦魔方</a>、<a href="https://cloud.qingstore.cn/">萌云|清玖云</a>、<a href="https://pan.mebk.org/">ME Drive云盘</a>、<a href="https://cncncloud.com/">小太阳云存储</a>、<a href="https://pan.bilnn.com/">比邻云盘</a>、<a href="https://ilolita945.softether.net:5212/">信爱云</a>、<a href="https://my-file.cn/">my-file</a>、<a href="https://bx.qingstore.cn/">玖麦云</a>、<a href="https://pan.mba/">MBA网盘</a>、<a href="https://pan.adycloud.com//">安迪云盘</a>、<a href="https://gofile.me/">gofile</a>、<a href="http://ctfile.com/">城通网盘</a>、<a href="https://www.90pan.com/">90网盘</a></p>
+<p>可自动搜索密码并添加，跳转后自动填写密码并提交，支持的网盘或在线文档站点列表：<a href="https://pan.baidu.com/">百度云</a>、<a href="https://eyun.baidu.com/">百度企业网盘</a>、<a href="https://pan.baidu.com/doc">百度云文档</a>、<a href="https://cloud.189.cn/">天翼云盘</a>、<a href="https://www.lanzou.com/">蓝奏云</a>、<a href="https://vdisk.weibo.com/">微盘</a>、<a href="https://share.weiyun.com/">微云</a>、<a href="https://pan.xunlei.com/">迅雷云盘</a>、<a href="http://115.com/">115网盘</a>、<a href="https://caiyun.139.com/">和彩云</a>、<a href="https://quqi.com/">曲奇云</a>、<a href="https://yunpan.360.cn/">360安全云盘</a>、<a href="https://pan-yz.chaoxing.com/">超星云盘</a>、<a href="https://www.wenshushu.cn/">文叔叔</a>、<a href="https://www.jianguoyun.com/">坚果云</a>、<a href="https://shandianpan.com/">闪电盘</a>、<a href="https://my.sharepoint.com/">SharePoint</a>、<a href="https://onedrive.live.com/">OneDrive</a>、<a href="https://cowtransfer.com/">奶牛快传</a>、<a href="http://u.163.com/">网易邮箱网盘</a>、<a href="https://www.aliyundrive.com/">阿里云盘</a>、<a href="https://www.123pan.com/">123云盘</a>、<a href="https://mo.own-cloud.cn/">小麦魔方</a>、<a href="https://cloud.qingstore.cn/">萌云|清玖云</a>、<a href="https://cncncloud.com/">小太阳云存储</a>、<a href="https://pan.bilnn.com/">比邻云盘</a>、<a href="https://ilolita945.softether.net:5212/">信爱云</a>、<a href="https://my-file.cn/">my-file</a>、<a href="https://pan.mba/">MBA网盘</a>、<a href="https://pan.adycloud.com//">安迪云盘</a>、<a href="http://ctfile.com/">城通网盘</a></p>
 <img alt="网盘自动填写密码" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/网盘自动填写密码.gif">
 <img alt="阿里云盘自动填写密码" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/阿里云盘自动填写密码.gif">
 <p><strong>不支持云查询密码</strong>，会在点击网盘链接时向后就近搜索页面中的密码，以<code>hash</code>或<code>password</code>参数的形式添加到链接中后使用携带密码的链接跳转</p>
@@ -157,8 +157,10 @@
 <img alt="自动切换镜像" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/%E8%87%AA%E5%8A%A8%E5%88%87%E6%8D%A2%E9%95%9C%E5%83%8F.jpg">
 </li>
 <li>
-<p>开启<code>自动切换镜像</code>后，点击Github链接会询问是否跳转到<code>fastgit</code>、<code>cnpmjs</code>或<code>rc1844</code>镜像站（随机出现），该功能<strong>仅为加速访问并浏览项目</strong>，跳转到镜像站后右下角会有<strong>不要登录帐号</strong>的提示，页面上方的主页图标、登录和注册按钮会被移除，<strong>请不要在镜像网站登录账号，若因此造成任何损失本人概不负责</strong></p>
+<p>开启<code>自动切换镜像</code>后，左击Github链接会询问是否跳转到<code>fastgit</code>、<code>cnpmjs</code>或<code>rc1844</code>镜像站（随机出现），选择<code>是</code>后<strong>默认会替换原链接</strong>，如果想要<strong>再次选择镜像</strong>需要<strong>刷新页面</strong>；可<strong>取消勾选</strong>配置菜单项<code>替换为镜像链接</code>（<strong>默认勾选</strong>，只有在勾选<code>自动切换镜像</code>后才能更改），则每次左击都会询问，选择<code>取消</code>后会在刷新页面前不再询问；右击Github链接时不会询问</p>
 <img alt="自动切换镜像" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/自动切换镜像.gif">
+<img alt="替换为镜像链接" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/替换为镜像链接.jpg">
+<p>该功能<strong>仅为加速访问并浏览项目</strong>，跳转到镜像站后右下角会有<strong>不要登录帐号</strong>的提示，页面上方的主页图标、登录和注册按钮会被移除，<strong>请不要在镜像网站登录账号，若因此造成任何损失本人概不负责</strong></p>
 <p>请勿频繁访问镜像站，否则可能会触发<code>滥用检测机制</code>，需要等几分钟才能再度访问；镜像站可能会找不到某些项目，出现这种情况时可<code>刷新页面</code>再次点击链接随机切换为别的镜像站（若询问还是出现上次404的镜像站，可<strong>多次点击</strong>链接进行随机切换），如果三个镜像站都找不到该项目，则可能Github上也不存在该项目</p>
 <img alt="触发滥用检测机制" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/触发滥用检测机制.jpg">
 <img alt="git镜像站404" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/git镜像站404.jpg">
@@ -181,13 +183,13 @@
     <summary id="ix">IX. 新标签打开链接</summary>
 <ol>
 <li><p><code>新标签打开链接</code>（默认开启，可通过配置菜单关闭），<strong>翻页链接、锚点链接</strong>会保持原有打开方式，磁力链接、电驴链接和迅雷链接会移除新标签打开属性；论坛自带<code>新窗</code>功能的帖子总览页可能无法通过此功能实现新标签打开帖子（如卡饭论坛等）</p></li>
-<p><img alt="新标签打开链接.gif" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/%E6%96%B0%E6%A0%87%E7%AD%BE%E6%89%93%E5%BC%80%E9%93%BE%E6%8E%A5.gif.jpg"></p>
+<p><img alt="新标签打开链接" src="https://gitee.com/oneNorth7/pics/raw/master/picgo/%E6%96%B0%E6%A0%87%E7%AD%BE%E6%89%93%E5%BC%80%E9%93%BE%E6%8E%A5.jpg"></p>
 <li>
 <p>可在启用新标签打开链接功能时针对特定站点屏蔽此功能（<code>保持默认打开方式</code>，优先级最高，可添加或删除）</p>
 <img alt="保持默认打开方式" src="https://cdn.jsdelivr.net/gh/oneNorth7/picgo/pics/保持默认打开方式.gif">
 </li>
 <li>
-<p>新标签打开<code>相对链接</code>，可在大量使用相对链接而又需要新标签打开的站点<strong>临时启用</strong>该功能；论坛自带<code>新窗</code>功能的帖子总览页可能无法通过此功能实现新标签打开帖子（如吾爱破解等）</p>
+<p>新标签打开<code>相对链接</code>，可在大量使用相对链接而又需要新标签打开的站点<strong>临时启用</strong>该功能，只有在勾选<code>新标签打开链接</code>菜单项后才能更改；论坛自带<code>新窗</code>功能的帖子总览页可能无法通过此功能实现新标签打开帖子（如吾爱破解等）</p>
 <img alt="新标签打开相对链接" src="https://cdn.jsdelivr.net/gh/oneNorth7/picgo/pics/新标签打开相对链接.gif">
 </li>
 </ol>
@@ -219,6 +221,7 @@
 
 ## 更新信息
 
+* V2.0.2 - 优化文本转链接功能，新增Github链接替换为镜像链接菜单项（from **[asdfq](https://greasyfork.org/zh-CN/scripts/422773-链接助手/discussions/103907)**）；取消MEdrive云盘、玖麦云盘、gofile和90网盘自动填写密码功能；优化各项功能
 * V2.0.1 - 新增123云盘、安迪云盘（from **[胡萝卜周](https://greasyfork.org/zh-CN/scripts/422773-链接助手/discussions/102777)**）自动填写密码功能；新增书行天下预处理功能；优化城通网盘域名映射；更换维基百科镜像域名；优化净化链接功能（from **[Annan Joris](https://greasyfork.org/zh-CN/scripts/422773-链接助手/discussions/100747)**）
 * V2.0.0 - 新增配置菜单面板（from **[紫龙](https://greasyfork.org/zh-CN/scripts/422773-%E9%93%BE%E6%8E%A5%E5%8A%A9%E6%89%8B/discussions/93325)**&**[胡萝卜周](https://greasyfork.org/zh-CN/scripts/422773-%E9%93%BE%E6%8E%A5%E5%8A%A9%E6%89%8B/discussions/93918)**）；新增自动打开站点功能；新增跳转页面；新增例外域名（from **[921_j](https://greasyfork.org/zh-CN/scripts/422773-%E9%93%BE%E6%8E%A5%E5%8A%A9%E6%89%8B/discussions/96768)**& **[kky5](https://github.com/oneNorth7/LinkHelper/issues/4)**）；优化移除链接重定向的代码逻辑
 * V1.9.9 - 新增异星软件空间、APP喵、翻应用预处理功能；新增Base64链接净化功能；优化跳转页面自动跳转功能
