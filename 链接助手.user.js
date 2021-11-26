@@ -2252,6 +2252,23 @@ $(function () {
                         if (timeId) clearTimeout(timeId);
                     });
             }
+            //识别操作系统
+            const u = navigator.userAgent.toLowerCase();
+            const isMac = /macintosh|macintel|mac os x/gi.test(u);
+            document.addEventListener("keydown", event => {
+		        const e = event || window.Event;
+		        const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
+                //添加一个快捷键打开设置页 ALT+M
+		        if (e.keyCode === 77 && ekey) {
+		          e.preventDefault();
+		          showSettings();
+		        }
+                //添加一个快捷键设置直达按钮 ALT+N
+		        if (e.keyCode === 78 && ekey) {
+		          e.preventDefault();
+		          directToMenu();
+		        }
+      		});
         }
     }
 });
